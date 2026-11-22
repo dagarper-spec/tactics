@@ -39,8 +39,8 @@ window.TT = window.TT || {};
       var mist = [], mtex = PX.glowTex(64);
       var MN = (quality && quality.mist) === 0 ? 0 : 7;
       for (i = 0; i < MN; i++) {
-        var mm = new THREE.Mesh(new THREE.PlaneGeometry(4.5, 2.2), new THREE.MeshBasicMaterial({
-          map: mtex, color: 0xaebfd8, transparent: true, opacity: 0.16, depthWrite: false
+        var mm = new THREE.Mesh(new THREE.PlaneGeometry(3, 1.6), new THREE.MeshBasicMaterial({
+          map: mtex, color: 0xaebfd8, transparent: true, opacity: 0.06, depthWrite: false
         }));
         mm.rotation.x = -Math.PI / 2;
         mm.position.set(-2 + i * 2, 0.45 + (i % 3) * 0.05, 4.5 + (i % 2) * 1 - 0.5);

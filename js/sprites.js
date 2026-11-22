@@ -43,7 +43,7 @@ window.TT = window.TT || {};
     blob(g, 7, 12, 5, P.leaf, r);
     blob(g, 17, 12, 5, P.leaf, r);
     blob(g, 12, 7, 6, P.leaf, r);
-    return S.outline(c);
+    return S.outline(c, '#24452A');
   };
 
   S.rock = function (seed) {
@@ -53,13 +53,13 @@ window.TT = window.TT || {};
     blob(g, 5, 9, 3, pal, r);
     blob(g, 13, 9, 3, pal, r);
     g.fillStyle = pal.dark; g.fillRect(3, 12, 12, 1);
-    return S.outline(c);
+    return S.outline(c, '#4A463F');
   };
 
   S.torch = function () {
     return S.outline(PX.fromRows([
       '.kk.', 'klwk', 'klwk', '.kk.', '.wk.', '.wk.', '.wk.', '.wk.', '.wk.', '.wk.', '.wk.', 'kwwk'
-    ], { k: P.wood.dark, w: P.wood.mid, l: P.wood.light }));
+    ], { k: P.wood.dark, w: P.wood.mid, l: P.wood.light }), '#3A2818');
   };
 
   S.flame = function (frame) {

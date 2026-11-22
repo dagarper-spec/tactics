@@ -47,19 +47,19 @@ window.TT = window.TT || {};
       // Antorchas: poste + llama (2 fotogramas) + brillo aditivo (sin luces reales).
       var tc = S.torch(), f0 = texOf(S.flame(0)), f1 = texOf(S.flame(1));
       TT.Props.torches.forEach(function (t, i) {
-        var px = t[0] + t[2], pz = t[1] + t[3], py = M.topY(t[0], t[1]);
+        var px = t[0] + t[2], pz = t[1] + t[3], py = M.topY(t[0], t[1]) + (t[4] || 0);
         billboard(tc, 1 / 16, px, py, pz);
-        var fm = new THREE.MeshBasicMaterial({ map: f0, transparent: true, alphaTest: 0.3 });
+        var fm = new THREE.MeshBasicMaterial({ map: f0, transparent: true, alphaTest: 0.3, color: 0xe0e0e0 });
         var fg = new THREE.PlaneGeometry(0.34, 0.4); fg.translate(0, 0.2, 0);
         var fl = new THREE.Mesh(fg, fm);
         fl.position.set(px, py + 0.72, pz);
         group.add(fl); bills.push(fl);
         flames.push({ mesh: fl, mat: fm, phase: i * 0.7, next: 0 });
         var gl = new THREE.Sprite(new THREE.SpriteMaterial({
-          map: glowTex, color: TT.hex(P.flame.edge), transparent: true, opacity: 0.55,
+          map: glowTex, color: TT.hex(P.flame.edge), transparent: true, opacity: 0.26,
           blending: THREE.AdditiveBlending, depthWrite: false
         }));
-        gl.scale.set(1.3, 1.3, 1); gl.position.set(px, py + 0.95, pz);
+        gl.scale.set(0.8, 0.8, 1); gl.position.set(px, py + 0.95, pz);
         group.add(gl); glows.push({ s: gl, phase: i * 1.3 });
       });
       var ftex = [f0, f1];
@@ -70,7 +70,7 @@ window.TT = window.TT || {};
         var w = fc.width / 14, h = fc.height / 14;
         var g = new THREE.PlaneGeometry(w, h, 6, 1); g.translate(w / 2, h / 2, 0);
         var m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: ftx, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide, color: tint }));
-        m.position.set(f[0] + f[2] - w / 2 + 0.1, M.topY(f[0], f[1]) + 0.3, f[1] + f[3]);
+        m.position.set(f[0] + f[2], M.topY(f[0], f[1]) + (f[4] || 0.3), f[1] + f[3]);
         group.add(m); bills.push(m);
         flags.push({ mesh: m, base: g.attributes.position.array.slice(), phase: i * 1.1, w: w });
       });
@@ -91,7 +91,7 @@ window.TT = window.TT || {};
           }
           for (i = 0; i < glows.length; i++) {
             var gl = glows[i];
-            gl.s.material.opacity = 0.5 + 0.12 * Math.sin(time * 9 + gl.phase) + 0.05 * Math.sin(time * 23 + gl.phase);
+            gl.s.material.opacity = 0.24 + 0.06 * Math.sin(time * 9 + gl.phase) + 0.03 * Math.sin(time * 23 + gl.phase);
           }
           for (i = 0; i < flags.length; i++) {
             var fl = flags[i], pos = fl.mesh.geometry.attributes.position, a = pos.array;

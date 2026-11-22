@@ -64,7 +64,7 @@ window.TT = window.TT || {};
       composer.addPass(new THREE.RenderPass(scene, TT.Cam.camera));
       var bloom = null;
       if (q.bloom) {
-        bloom = new THREE.UnrealBloomPass(new THREE.Vector2(w, h), 0.8, 0.5, 0.78);
+        bloom = new THREE.UnrealBloomPass(new THREE.Vector2(w, h), 0.5, 0.4, 0.8);
         composer.addPass(bloom);
       }
       composer.addPass(new THREE.ShaderPass(VignetteShader));

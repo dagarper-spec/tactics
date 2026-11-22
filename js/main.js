@@ -15,6 +15,7 @@ window.TT = window.TT || {};
     var R = TT.Render.init($('game'), qKey);
     var scene = R.scene;
     var terrain = TT.Terrain.build(scene, R.q);
+    TT.Fort.build(scene, R.q);
     var scenery = TT.Scenery.build(scene, R.q);
     var parts = TT.Particles.build(scene, R.q);
     TT.Cam.bind($('game'), onTap);
