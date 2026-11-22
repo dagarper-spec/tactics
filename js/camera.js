@@ -15,6 +15,7 @@ window.TT = window.TT || {};
     dist: 17, distGoal: 17,
     minDist: 8, maxDist: 26,
     viewH: 600,
+    shakeA: 0, shakeT: 0, shakeD: 0.2,
 
     resize: function (w, h) {
       C.camera.aspect = w / h; C.viewH = h;
@@ -24,6 +25,11 @@ window.TT = window.TT || {};
       C.step = (C.step + dir + 4) % 4;
       C.yawGoal += dir * Math.PI / 2; // acumulado: gira por el camino corto
     },
+    // Centra suavemente la cámara en una casilla/posición del mundo.
+    focus: function (x, y, z) {
+      C.goal.set(Math.max(-1, Math.min(M.N, x)), y, Math.max(-1, Math.min(M.N, z)));
+    },
+    shake: function (amount, dur) { C.shakeA = amount; C.shakeT = C.shakeD = dur || 0.2; },
     zoom: function (f) {
       C.distGoal = Math.max(C.minDist, Math.min(C.maxDist, C.distGoal * f));
     },
@@ -48,6 +54,12 @@ window.TT = window.TT || {};
         C.target.y + sp * C.dist,
         C.target.z + Math.cos(C.yaw) * cp * C.dist
       );
+      if (C.shakeT > 0) {
+        C.shakeT = Math.max(0, C.shakeT - dt);
+        var k = C.shakeA * (C.shakeT / C.shakeD);
+        C.camera.position.x += (Math.random() - 0.5) * 2 * k;
+        C.camera.position.y += (Math.random() - 0.5) * 2 * k;
+      }
       C.camera.lookAt(C.target);
     },
 

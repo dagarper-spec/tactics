@@ -1,4 +1,4 @@
-// Arranque y bucle principal (delta time). Hito 2: escena, unidades, selección y movimiento.
+// Arranque y bucle principal (delta time). Hito 3: turnos, ataque básico y previsualización de daño.
 window.TT = window.TT || {};
 (function () {
   function $(id) { return document.getElementById(id); }
@@ -17,7 +17,9 @@ window.TT = window.TT || {};
 
     TT.Units.init();
     var view = TT.UnitView.build(R.scene);
-    var sel = TT.Selection.init(R.scene, terrain, view, TT.Cam.camera);
+    var fx = TT.FX.build(R.scene);
+    TT.QueueUI.init($('queue'));
+    var sel = TT.Selection.init(R.scene, terrain, view, fx, TT.Cam);
     TT.Cam.bind($('game'), sel.onTap);
 
     $('rotL').addEventListener('click', function () { TT.Cam.rotate(-1); });
@@ -39,6 +41,7 @@ window.TT = window.TT || {};
       scenery.update(dt, TT.Cam.yaw);
       parts.update(dt, time);
       view.update(dt, TT.Cam.yaw, time);
+      fx.update(dt);
       sel.update(time, dt);
       R.render();
       fpsAcc += dt; fpsN++;

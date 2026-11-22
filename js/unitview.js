@@ -28,6 +28,7 @@ window.TT = window.TT || {};
         v.pick.position.y = 0.47; v.pick.userData.unit = u;
         v.group.add(v.shadow, v.ring, v.sprite, v.pick);
         v.group.position.copy(v.pos);
+        v.flash = 0; v.dying = 0;
         scene.add(v.group);
         items.push(v); byId[u.id] = v; picks.push(v.pick);
       });
@@ -36,6 +37,11 @@ window.TT = window.TT || {};
         picks: picks, items: items,
         busy: function () { return items.some(function (v) { return !!v.path; }); },
         select: function (u) { selected = u; },
+        face: function (u) { byId[u.id].face = u.face; },
+        flash: function (u) { byId[u.id].flash = 0.3; },
+        kill: function (u) { byId[u.id].dying = 0.5; },
+        // Posición actual en el mundo (para efectos).
+        posOf: function (u) { return byId[u.id].pos; },
         // Coloca la vista en la casilla lógica actual (tras deshacer).
         snap: function (u) { var v = byId[u.id]; v.path = null; v.pos.copy(wpos(u.x, u.y)); v.face = u.face; },
         // La lógica ya movió a la unidad; esto solo anima el recorrido.
@@ -78,6 +84,15 @@ window.TT = window.TT || {};
             var pulse = sel ? 1 + 0.08 * Math.sin(time * 6) : 1;
             v.ring.scale.set(pulse, pulse, 1);
             v.shadow.scale.set(1 - hop, 1 - hop, 1);
+            if (v.flash > 0) {                                   // destello rojo al recibir daño
+              v.flash -= dt;
+              v.mat.color.setHex(v.flash > 0 ? 0xff7070 : 0xf2eefa);
+            }
+            if (v.dying > 0) {                                   // desvanecer al morir
+              v.dying -= dt;
+              v.mat.opacity = Math.max(0, v.dying / 0.5);
+              if (v.dying <= 0) { v.dying = -1; v.group.visible = false; }
+            }
           }
         }
       };
