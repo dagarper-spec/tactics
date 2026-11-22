@@ -49,8 +49,14 @@ window.TT = window.TT || {};
     },
     cost: function (x, y) { return M.get(x, y).type === 'ford' ? 2 : 1; },
     // Paso permitido entre vecinas: diferencia de nivel <= 1.
+    // Muros del fuerte: cortan el paso entre la meseta (x 2-5, y 0-1) y sus lados.
+    wall: function (x1, y1, x2, y2) {
+      if (y1 !== y2 || y1 > 1) return false;
+      var a = Math.min(x1, x2), b = Math.max(x1, x2);
+      return b - a === 1 && (a === 1 || a === 5);
+    },
     canStep: function (x1, y1, x2, y2) {
-      if (!M.walkable(x2, y2)) return false;
+      if (!M.walkable(x2, y2) || M.wall(x1, y1, x2, y2)) return false;
       return Math.abs(M.get(x1, y1).h - M.get(x2, y2).h) <= 1;
     },
     // Casillas alcanzables con presupuesto de movimiento (Dijkstra simple).
@@ -61,6 +67,7 @@ window.TT = window.TT || {};
       while (open.length) {
         open.sort(function (a, b) { return a.c - b.c; });
         var cur = open.shift();
+        if (cur.c > best[cur.x + ',' + cur.y]) continue; // duplicado peor
         out.push(cur);
         for (var i = 0; i < 4; i++) {
           var nx = cur.x + D[i][0], ny = cur.y + D[i][1];
@@ -69,7 +76,7 @@ window.TT = window.TT || {};
           var nc = cur.c + M.cost(nx, ny), k = nx + ',' + ny;
           if (nc > mv || (best[k] !== undefined && best[k] <= nc)) continue;
           best[k] = nc;
-          open.push({ x: nx, y: ny, c: nc });
+          open.push({ x: nx, y: ny, c: nc, p: cur });
         }
       }
       return out;

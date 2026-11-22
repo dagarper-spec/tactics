@@ -1,0 +1,88 @@
+// Vista de unidades: sprites que miran a la cámara, anillo de bando, sombra y animación de paso.
+window.TT = window.TT || {};
+(function () {
+  var P = TT.PAL, M = TT.Map, hex = TT.hex, S = 1 / 32;
+  var STEP = 0.2;                                   // segundos por casilla
+
+  function wpos(x, y) { return new THREE.Vector3(x, M.topY(x, y), y); }
+
+  TT.UnitView = {
+    build: function (scene) {
+      var items = [], byId = {}, picks = [], selected = null;
+      var shadowTex = TT.Sprites.shadow(), ringGeo = new THREE.RingGeometry(0.3, 0.42, 24);
+      var geo = new THREE.PlaneGeometry(34 * S, 34 * S); geo.translate(0, 17 * S - 4 * S, 0);
+      var shGeo = new THREE.PlaneGeometry(0.9, 0.9);
+
+      TT.Units.list.forEach(function (u, i) {
+        var v = { u: u, i: i, path: null, t: 0, idx: 0, done: null, pos: wpos(u.x, u.y), face: u.face };
+        v.front = TT.UnitArt.tex(u.type, false); v.back = TT.UnitArt.tex(u.type, true);
+        v.group = new THREE.Group();
+        v.mat = new THREE.MeshBasicMaterial({ map: v.front, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide, color: 0xf2eefa });
+        v.sprite = new THREE.Mesh(geo, v.mat);
+        v.baseCol = hex(u.side === 'hero' ? P.side.hero : P.side.enemy);
+        v.ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: v.baseCol, transparent: true, opacity: 0.9, depthWrite: false }));
+        v.ring.rotation.x = -Math.PI / 2; v.ring.position.y = 0.03;
+        v.shadow = new THREE.Mesh(shGeo, new THREE.MeshBasicMaterial({ map: shadowTex, color: 0x000000, transparent: true, opacity: 0.35, depthWrite: false }));
+        v.shadow.rotation.x = -Math.PI / 2; v.shadow.position.y = 0.02;
+        v.pick = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.95, 0.6), new THREE.MeshBasicMaterial({ visible: false }));
+        v.pick.position.y = 0.47; v.pick.userData.unit = u;
+        v.group.add(v.shadow, v.ring, v.sprite, v.pick);
+        v.group.position.copy(v.pos);
+        scene.add(v.group);
+        items.push(v); byId[u.id] = v; picks.push(v.pick);
+      });
+
+      var V = {
+        picks: picks, items: items,
+        busy: function () { return items.some(function (v) { return !!v.path; }); },
+        select: function (u) { selected = u; },
+        // Coloca la vista en la casilla lógica actual (tras deshacer).
+        snap: function (u) { var v = byId[u.id]; v.path = null; v.pos.copy(wpos(u.x, u.y)); v.face = u.face; },
+        // La lógica ya movió a la unidad; esto solo anima el recorrido.
+        moveAlong: function (u, path, done) {
+          var v = byId[u.id], pts = [v.pos.clone()];
+          path.forEach(function (c) { pts.push(wpos(c.x, c.y)); });
+          v.path = pts; v.idx = 0; v.t = 0; v.done = done || null;
+        },
+        update: function (dt, yaw, time) {
+          var sy = Math.sin(yaw), cy = Math.cos(yaw);
+          for (var k = 0; k < items.length; k++) {
+            var v = items[k], hop = 0;
+            if (v.path) {
+              var a = v.path[v.idx], b = v.path[v.idx + 1], dy = Math.abs(b.y - a.y);
+              var dur = STEP + (dy > 0.01 ? 0.08 : 0);
+              v.t += dt / dur;
+              var t = Math.min(1, v.t);
+              v.pos.lerpVectors(a, b, t);
+              hop = Math.sin(Math.PI * t) * (0.16 + dy * 0.5);
+              v.face = TT.faceOf(b.x - a.x, b.z - a.z);
+              if (v.t >= 1) {
+                v.idx++; v.t = 0;
+                if (v.idx >= v.path.length - 1) {
+                  v.pos.copy(v.path[v.path.length - 1]); v.path = null;
+                  if (v.done) { var d = v.done; v.done = null; d(); }
+                }
+              }
+            }
+            v.group.position.copy(v.pos);
+            // Frente/espalda según hacia dónde mira respecto a la cámara; espejo según el lado de la pantalla.
+            var f = TT.DIR[v.face];
+            var toCam = f[0] * sy + f[1] * cy, side = f[0] * cy - f[1] * sy;
+            var m = toCam >= 0 ? v.front : v.back;
+            if (v.mat.map !== m) v.mat.map = m;
+            v.sprite.scale.x = side < 0 ? -1 : 1;
+            v.sprite.rotation.y = yaw;
+            v.sprite.position.y = hop + (v.path ? 0 : 0.012 * Math.sin(time * 3 + v.i));
+            var sel = selected === v.u;
+            v.ring.material.color.setHex(sel ? hex(P.side.select) : v.baseCol);
+            var pulse = sel ? 1 + 0.08 * Math.sin(time * 6) : 1;
+            v.ring.scale.set(pulse, pulse, 1);
+            v.shadow.scale.set(1 - hop, 1 - hop, 1);
+          }
+        }
+      };
+      return V;
+    }
+  };
+})();
+// FIN DE ARCHIVO

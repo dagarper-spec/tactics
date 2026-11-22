@@ -10,7 +10,7 @@
 <body>
 <canvas id="game"></canvas>
 <div id="top">
-  <div class="panel" id="title">EL PASO DEL RÍO · Hito 1</div>
+  <div class="panel" id="title">EL PASO DEL RÍO · Hito 2</div>
   <div class="btns">
     <button id="rotL" title="Girar cámara (Q)" aria-label="Girar a la izquierda">&#8630;</button>
     <button id="rotR" title="Girar cámara (E)" aria-label="Girar a la derecha">&#8631;</button>
@@ -18,7 +18,13 @@
   </div>
   <div id="fps"></div>
 </div>
-<div class="panel" id="hud">Toca una casilla. Arrastra para mover, pellizca o usa la rueda para el zoom.</div>
+<div class="panel" id="hud">
+  <div id="info">Toca una unidad para seleccionarla. Arrastra para mover la cámara; pellizca o usa la rueda para el zoom.</div>
+  <div class="btns" id="actions">
+    <button id="undo">Deshacer</button>
+    <button id="reset">Nueva ronda</button>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
@@ -37,6 +43,10 @@
 <script src="js/scenery.js"></script>
 <script src="js/fort.js"></script>
 <script src="js/particles.js"></script>
+<script src="js/units.js"></script>
+<script src="js/unitart.js"></script>
+<script src="js/unitview.js"></script>
+<script src="js/selection.js"></script>
 <script src="js/camera.js"></script>
 <script src="js/render.js"></script>
 <script src="js/main.js"></script>

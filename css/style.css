@@ -17,8 +17,10 @@ html, body {
 }
 #hud {
   position: fixed; left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom));
-  max-width: 420px; min-height: 40px;
+  max-width: 460px; min-height: 40px;
 }
+#actions { margin-top: 8px; }
+#actions button { min-height: 40px; font-size: 14px; }
 #top {
   position: fixed; top: max(10px, env(safe-area-inset-top)); left: 12px; right: 12px;
   display: flex; gap: 8px; align-items: center; justify-content: space-between; pointer-events: none;
