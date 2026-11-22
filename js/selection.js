@@ -6,7 +6,8 @@ window.TT = window.TT || {};
 
   TT.Selection = {
     init: function (terrain, view, fx, camera, badges, hl) {
-      var mode = 'move', insp = null, reach = [], sk = null, aim = null, spend = 0;
+      var mode = 'move', insp = null, reach = [], sk = null, aim = null, spend = 0, timers = [];
+      function later(sec, fn) { timers.push({ t: sec, fn: fn }); }
       var ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
 
       function potenciable(s) { return s.kind === 'dmg' || s.kind === 'heal' || s.kind === 'mix'; }
@@ -26,7 +27,7 @@ window.TT = window.TT || {};
         T.skipped.forEach(function (u) { fx.number(view.posOf(u), 'Recupera', P.state.shield, false); });
         var p = view.posOf(T.cur); camera.focus(p.x, p.y, p.z);
         TT.QueueUI.refresh();
-        refresh();
+        if (T.cur.side === 'enemy') runAI(); else refresh();
       }
 
       function refresh() {
@@ -34,8 +35,8 @@ window.TT = window.TT || {};
         var cur = T.cur, btn = [], kit = A.kit(cur), head = HUD.turnLine();
         if (mode === 'over') {
           hl.cursorShow(false); view.select(null);
-          HUD.text(T.winner === 'hero' ? '<b>¡Victoria!</b> Todos los enemigos han caído.' : '<b>Derrota.</b> Los héroes han caído.');
-          HUD.buttons([{ label: 'Reiniciar', fn: function () { location.reload(); } }]);
+          HUD.text('Fin de la batalla.'); HUD.buttons([]);
+          HUD.end(T.winner, T.round, U.list.filter(function (u) { return u.side === 'hero' && u.hp > 0; }).length);
           return;
         }
         view.select(cur); hl.cursorShow(true);
@@ -88,24 +89,7 @@ window.TT = window.TT || {};
 
       function changed() { if (T.phase === 'over') { mode = 'over'; TT.QueueUI.refresh(); refresh(); } else startTurn(); }
 
-      // Efectos visuales de un resultado (números, destellos, sacudida).
-      function play(res) {
-        var shake = 0.1;
-        res.forEach(function (e) {
-          var p = view.posOf(e.u);
-          if (e.kind === 'dmg') {
-            var r = e.r;
-            fx.damage(p, r); view.flash(e.u);
-            if (r.weak) fx.number(p, '¡Débil!', P.dmg[r.type], false, 0.55);
-            if (r.slowed) fx.number(p, 'Ralentizado', P.dmg.ice, false, 0.8);
-            if (r.broke) { fx.number(p, '¡ROTO!', P.state.broken, true, 1.1); shake = Math.max(shake, 0.25); }
-            if (r.kill) { view.kill(e.u); shake = Math.max(shake, 0.18); }
-          } else if (e.kind === 'heal') fx.number(p, '+' + e.amt, P.state.hp, true);
-          else if (e.kind === 'bless') fx.number(p, '+1 Potenciar', P.state.boost, false);
-          else if (e.kind === 'taunt') fx.number(p, '¡Provoca!', P.side.select, true);
-        });
-        camera.shake(shake, 0.2);
-      }
+      var play = TT.PlayFX.make(view, fx, camera);
 
       function confirm() {
         var cur = T.cur, res = A.resolve(cur, sk, aim, spend);
@@ -156,12 +140,46 @@ window.TT = window.TT || {};
         }
       }
 
+      // Turno enemigo automático, con pausas para que se pueda seguir lo que ocurre.
+      function runAI() {
+        var cur = T.cur, plan = TT.AI.plan(cur);
+        mode = 'busy'; hl.clear(); badges.refresh(); view.select(cur); hl.cursorShow(true);
+        HUD.buttons([]); HUD.text(HUD.turnLine() + '<br>' + HUD.card(cur));
+        function finish() {
+          cur.face = plan.face; view.face(cur);
+          if (T.phase === 'act') T.wait();
+          hl.clear(); T.endTurn(); changed();
+        }
+        function act() {
+          if (!plan.skill) { finish(); return; }
+          var s = plan.skill, a = plan.aim;
+          if (a) A.area(cur, s, a).forEach(function (t) { hl.add(t.x, t.y, 'area'); });
+          else if (s.shape === 'around') A.area(cur, s, null).forEach(function (t) { hl.add(t.x, t.y, 'area'); });
+          HUD.text(HUD.turnLine() + '<br>' + TT.AI.describe(cur, plan));
+          later(0.6, function () {
+            var res = A.resolve(cur, s, a, plan.spend);
+            if (a && (a.x !== cur.x || a.y !== cur.y)) { cur.face = TT.faceOf(a.x - cur.x, a.y - cur.y); view.face(cur); }
+            play(res); hl.clear(); T.attackDone(); badges.refresh(); TT.QueueUI.refresh();
+            if (T.phase === 'over') later(1.1, function () { mode = 'over'; refresh(); });
+            else later(0.8, finish);
+          });
+        }
+        later(0.45, function () {
+          if (plan.path) { U.move(cur, plan.path); view.moveAlong(cur, plan.path, function () { later(0.25, act); }); }
+          else act();
+        });
+      }
+
       T.init(); startTurn();
 
       return {
         onTap: onTap,
-        update: function (time) {
-          if (mode === 'over' || mode === 'busy') return;
+        update: function (time, dt) {
+          for (var i = timers.length - 1; i >= 0; i--) {          // temporizadores por delta time
+            timers[i].t -= dt;
+            if (timers[i].t <= 0) { var f = timers[i].fn; timers.splice(i, 1); f(); }
+          }
+          if (mode === 'over') return;
           hl.cursorAt(view.posOf(T.cur), M.get(T.cur.x, T.cur.y).type === 'ford', time);
         }
       };

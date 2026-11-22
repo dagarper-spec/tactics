@@ -32,6 +32,12 @@ button:disabled { opacity: 0.4; }
 .qi.later { opacity: 0.55; }
 .qi i { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: #14121F; }
 .qi i b { display: block; height: 100%; background: #5BD16F; } .qi i b.low { background: #E5534B; }
+#end { position: fixed; left: 50%; top: 42%; transform: translate(-50%, -50%); width: min(320px, 86vw); text-align: center; padding: 18px; }
+#end[hidden] { display: none; }
+#end h2 { margin: 0 0 8px; font-size: 28px; letter-spacing: 0.04em; }
+#end h2.win { color: #FFE066; } #end h2.lose { color: #E5534B; }
+#end p { margin: 4px 0; }
+#end button { margin-top: 12px; }
 .ic { width: 14px; height: 14px; vertical-align: -2px; margin-right: 3px; image-rendering: pixelated; }
 .ql { color: var(--gold); font-size: 12px; flex: none; padding: 0 4px; }
 #actions button { min-height: 40px; font-size: 14px; }

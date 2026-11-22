@@ -1,4 +1,4 @@
-// Arranque y bucle principal (delta time). Hito 4b: habilidades, áreas, recargas y estados sobre el combate por turnos.
+// Arranque y bucle principal (delta time). Hito 5: IA enemiga y cierre de batalla.
 window.TT = window.TT || {};
 (function () {
   function $(id) { return document.getElementById(id); }

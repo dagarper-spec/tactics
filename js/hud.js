@@ -53,6 +53,17 @@ window.TT = window.TT || {};
       ' · DF ' + s.df + ' · RS ' + s.rs + ' · VL ' + s.vl + ' · MV ' + s.mv + ex;
   };
 
+  // Pantalla de fin de batalla.
+  H.end = function (winner, rounds, alive) {
+    var el = $('end'), win = winner === 'hero';
+    el.innerHTML = '<h2 class="' + (win ? 'win' : 'lose') + '">' + (win ? '¡Victoria!' : 'Derrota') + '</h2>' +
+      '<p>' + (win ? 'Los enemigos han caído.' : 'Los héroes han caído.') + '</p>' +
+      '<p>Rondas: <b>' + rounds + '</b> · Héroes en pie: <b>' + alive + '/4</b></p>' +
+      '<button id="again">Jugar de nuevo</button>';
+    el.hidden = false;
+    $('again').addEventListener('click', function () { location.reload(); });
+  };
+
   H.tile = function (c) { return '<b>' + M.label(c.x, c.y) + '</b> · ' + TILE[c.type] + ' · altura ' + Math.max(0, c.h); };
 
   var SHAPE = { burst: 'área 3×3', cross: 'cruz de 5', line: 'línea de 3', around: 'las 4 casillas vecinas', self: 'sobre sí mismo' };
