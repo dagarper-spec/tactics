@@ -31,13 +31,22 @@ window.TT = window.TT || {};
   };
 
   function ic(t) { return '<img class="ic" src="' + TT.Icons.url(t) + '" alt="">' + TT.TypeNames[t]; }
+  // Estados activos y recargas.
+  function st(u) {
+    var a = [];
+    if (u.taunt > 0) a.push('Provocando (' + u.taunt + ')');
+    if (u.slow > 0) a.push('Ralentizado');
+    Object.keys(u.cd).forEach(function (k) { if (u.cd[k] > 0) a.push(TT.Skills[k].name + ' en recarga (' + u.cd[k] + ')'); });
+    return a.length ? ' · ' + a.join(' · ') : '';
+  }
   function n2(x) { return String(+x.toFixed(2)).replace('.', ','); }
 
   H.card = function (u) {
-    var s = u.st, c = M.get(u.x, u.y), ex = '<br>Potenciar ' + u.boost + '/' + TT.Bal.boostMax;
+    var s = u.st, c = M.get(u.x, u.y), ex = '<br>Potenciar ' + u.boost + '/' + TT.Bal.boostMax + st(u);
     if (u.shieldMax) {
       ex += ' · ' + (u.broken ? '<b style="color:#FF3B6B">ROTO</b> (pierde su próximo turno, recibe ×1,5)' : 'Escudos ' + u.shield + '/' + u.shieldMax) +
-        '<br>Debilidades: ' + u.weak.map(function (t) { return u.known[t] ? ic(t) : '?'; }).join(' · ');
+        '<br>Debilidades: ' + u.weak.map(function (t) { return u.known[t] ? ic(t) : '?'; }).join(' · ') +
+        '<br><small>Escudo = golpes de debilidad que faltan para romperlo · ? = debilidad oculta · flecha dorada = Potenciar</small>';
     }
     return '<b>' + u.name + '</b> · ' + SIDE[u.side] + ' · ' + M.label(u.x, u.y) + ' · altura ' + Math.max(0, c.h) +
       ' · mira al ' + TT.DIR_NAMES[u.face] + '<br>HP ' + u.hp + '/' + u.maxHp + ' · AT ' + s.at + ' · MG ' + s.mg +
@@ -46,19 +55,43 @@ window.TT = window.TT || {};
 
   H.tile = function (c) { return '<b>' + M.label(c.x, c.y) + '</b> · ' + TILE[c.type] + ' · altura ' + Math.max(0, c.h); };
 
-  // Previsualización exacta del daño antes de confirmar.
-  H.preview = function (att, tgt, r, spend) {
-    var mods = [];
-    if (r.dl !== 0) mods.push('Altura ' + pct(r.mH - 1));
-    mods.push(ORIENT[r.orient]);
-    if (tgt.broken) mods.push('Roto ×1,5');
-    if (spend) mods.push('Potenciar ×' + n2(r.mP) + ' (' + spend + ' pt)');
-    if (r.capped) mods.push('tope ×3,5');
-    var wk = tgt.known[r.type] && TT.Combat.hitsWeak(tgt, r.type)     // solo si ya se conoce la debilidad
-      ? '<br>' + ic(r.type) + ' <b>¡Débil!</b> −1 escudo' + (tgt.shield === 1 ? ' → <b>¡Rotura!</b>' : '') : '';
-    return '<b>' + att.name + ' → ' + tgt.name + '</b> · ' + r.skill.name + ' (' + TT.TypeNames[r.type] + ')' +
-      '<br>Daño <b>' + r.dmg + '</b> · HP ' + tgt.hp + ' → ' + r.hpAfter + (r.kill ? ' · <b>¡lo derrota!</b>' : '') +
-      '<br>' + mods.join(' · ') + wk;
+  var SHAPE = { burst: 'área 3×3', cross: 'cruz de 5', line: 'línea de 3', around: 'las 4 casillas vecinas', self: 'sobre sí mismo' };
+
+  // Descripción corta de una habilidad (alcance, forma, recarga).
+  H.skillHint = function (sk) {
+    var a = [];
+    if (sk.type) a.push(TT.TypeNames[sk.type]);
+    if (sk.shape !== 'self' && sk.shape !== 'around') a.push('alcance ' + sk.range + (sk.melee ? '' : ' (+1 por nivel de ventaja)'));
+    if (SHAPE[sk.shape]) a.push(SHAPE[sk.shape]);
+    if (sk.cd) a.push('recarga ' + sk.cd);
+    return '<b>' + sk.name + '</b> · ' + a.join(' · ');
   };
+
+  function line(e, att) {
+    var u = e.u, n = '<b>' + u.name + '</b>: ';
+    if (e.kind === 'heal') return n + '+' + e.amt + ' PV (HP ' + u.hp + ' → ' + (u.hp + e.amt) + ')';
+    if (e.kind === 'bless') return n + '+1 Potenciar';
+    var r = e.r, m = [];
+    if (r.dl !== 0) m.push('Altura ' + pct(r.mH - 1));
+    if (r.orient !== 'front') m.push(ORIENT[r.orient]);
+    if (u.broken) m.push('Roto ×1,5');
+    if (r.capped) m.push('tope ×3,5');
+    var wk = u.known[r.type] && TT.Combat.hitsWeak(u, r.type)           // solo si ya se conoce la debilidad
+      ? ' · ' + ic(r.type) + '<b>¡Débil!</b> −1 escudo' + (u.shield === 1 ? ' → <b>¡Rotura!</b>' : '') : '';
+    return n + 'daño <b>' + r.dmg + '</b> (HP ' + u.hp + ' → ' + r.hpAfter + ')' + (r.kill ? ' <b>¡derrotado!</b>' : '') +
+      (m.length ? ' · ' + m.join(' · ') : '') + wk;
+  }
+
+  // Previsualización exacta antes de confirmar: una línea por objetivo afectado.
+  H.preview = function (att, sk, effects, spend, extra) {
+    var out = [H.skillHint(sk)];
+    if (!effects.length && !extra) out.push('Sin objetivos en la zona.');
+    effects.forEach(function (e) { out.push(line(e, att)); });
+    if (extra) out.push(extra);
+    if (sk.kind !== 'taunt' && sk.kind !== 'bless')
+      out.push('Potenciar: gastas ' + spend + ' de ' + att.boost + ' disponibles' + (spend ? ' (×' + n2(1 + TT.Bal.boostPer * spend) + ')' : ''));
+    return out.join('<br>');
+  };
+
 })();
 // FIN DE ARCHIVO

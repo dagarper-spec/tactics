@@ -1,4 +1,4 @@
-// Arranque y bucle principal (delta time). Hito 4a: escudos, Rotura y Potenciar sobre el combate por turnos.
+// Arranque y bucle principal (delta time). Hito 4b: habilidades, áreas, recargas y estados sobre el combate por turnos.
 window.TT = window.TT || {};
 (function () {
   function $(id) { return document.getElementById(id); }
@@ -20,7 +20,8 @@ window.TT = window.TT || {};
     var fx = TT.FX.build(R.scene);
     TT.QueueUI.init($('queue'));
     var badges = TT.Badges.build(R.scene, view);
-    var sel = TT.Selection.init(R.scene, terrain, view, fx, TT.Cam, badges);
+    var hl = TT.Highlight.build(R.scene);
+    var sel = TT.Selection.init(terrain, view, fx, TT.Cam, badges, hl);
     TT.Cam.bind($('game'), sel.onTap);
 
     $('rotL').addEventListener('click', function () { TT.Cam.rotate(-1); });

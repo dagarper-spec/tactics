@@ -33,7 +33,7 @@ window.TT = window.TT || {};
           st: { at: d.at, mg: d.mg, df: d.df, rs: d.rs, vl: d.vl, mv: d.mv },
           x: grp[t][0], y: grp[t][1], face: g[1], moved: false, undo: null,
           weak: (d.weak || []).slice(), shield: (d.weak || []).length, shieldMax: (d.weak || []).length,
-          known: {}, broken: false, boost: 0
+          known: {}, broken: false, boost: 0, cd: {}, taunt: 0, slow: 0
         });
       });
     });
@@ -48,8 +48,8 @@ window.TT = window.TT || {};
   };
 
   // Casillas donde puede terminar: pasa por aliados, no por enemigos, y no acaba sobre nadie.
-  U.reach = function (u) {
-    var raw = M.reach(u.x, u.y, u.st.mv, function (x, y) {
+  U.reach = function (u, mv) {
+    var raw = M.reach(u.x, u.y, mv === undefined ? u.st.mv : mv, function (x, y) {
       var o = U.at(x, y);
       return o && o.side !== u.side;
     });

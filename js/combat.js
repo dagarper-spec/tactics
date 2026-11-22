@@ -7,6 +7,7 @@ window.TT = window.TT || {};
 
   C.level = function (u) { return Math.max(0, M.get(u.x, u.y).h); };
   C.skill = function (u) { return TT.Skills[TT.Basic[u.type]]; };
+  C.levelAt = function (x, y) { return Math.max(0, M.get(x, y).h); };
   C.dist = function (a, b) { return Math.abs(a.x - b.x) + Math.abs(a.y - b.y); };
 
   // Alcance efectivo contra un objetivo concreto (la ventaja de altura suma alcance).
@@ -72,7 +73,6 @@ window.TT = window.TT || {};
       tgt.known[r.type] = true; tgt.shield--;
       if (tgt.shield === 0) { tgt.broken = true; r.broke = true; }
     }
-    if (att.boost >= 0 && opts.boost) att.boost = Math.max(0, att.boost - opts.boost);
     return r;
   };
 })();
