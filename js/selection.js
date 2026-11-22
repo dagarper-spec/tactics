@@ -4,8 +4,8 @@ window.TT = window.TT || {};
   var P = TT.PAL, M = TT.Map, U = TT.Units, C = TT.Combat, T = TT.Turns, hex = TT.hex;
 
   TT.Selection = {
-    init: function (scene, terrain, view, fx, camera) {
-      var mode = 'move', insp = null, reach = [], tgt = null, pool = [];
+    init: function (scene, terrain, view, fx, camera, badges) {
+      var mode = 'move', insp = null, reach = [], tgt = null, pool = [], spend = 0;
       var ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
 
       var frame = TT.PX.fromRows([
@@ -36,14 +36,15 @@ window.TT = window.TT || {};
       }
 
       function startTurn() {
-        insp = T.cur; mode = 'move'; tgt = null;
+        insp = T.cur; mode = 'move'; tgt = null; spend = 0;
+        T.skipped.forEach(function (u) { fx.number(view.posOf(u), 'Recupera', P.state.shield, false); });
         var p = view.posOf(T.cur); camera.focus(p.x, p.y, p.z);
         TT.QueueUI.refresh();
         refresh();
       }
 
       function refresh() {
-        clearHl();
+        clearHl(); badges.refresh();
         var cur = T.cur;
         if (mode === 'over') {
           cursor.visible = false;
@@ -72,8 +73,13 @@ window.TT = window.TT || {};
           btn = [{ label: 'Cancelar', fn: function () { mode = 'move'; refresh(); } }];
         } else if (mode === 'preview') {
           hl(tgt.x, tgt.y, 'target');
-          TT.HUD.text(TT.HUD.preview(cur, tgt, C.calc(cur, tgt)));
-          btn = [{ label: 'Confirmar', fn: doAttack }, { label: 'Cancelar', fn: function () { mode = 'attack'; refresh(); } }];
+          spend = Math.min(spend, cur.boost);
+          TT.HUD.text(TT.HUD.preview(cur, tgt, C.calc(cur, tgt, null, { boost: spend }), spend) +
+            '<br>Potenciar disponible: ' + cur.boost + '/' + TT.Bal.boostMax);
+          btn = [{ label: 'Confirmar', fn: doAttack },
+                 { label: 'Potenciar +', off: spend >= cur.boost, fn: function () { spend++; refresh(); } },
+                 { label: 'Potenciar −', off: spend <= 0, fn: function () { spend--; refresh(); } },
+                 { label: 'Cancelar', fn: function () { mode = 'attack'; refresh(); } }];
         } else if (mode === 'face') {
           TT.DIR.forEach(function (d) { if (M.inBounds(cur.x + d[0], cur.y + d[1])) hl(cur.x + d[0], cur.y + d[1], 'face'); });
           TT.HUD.text(head + '<br>Toca una casilla vecina para cambiar hacia dónde mira (ahora: ' + TT.DIR_NAMES[cur.face] + ').');
@@ -85,11 +91,14 @@ window.TT = window.TT || {};
       function afterTurnChange() { if (T.phase === 'over') { mode = 'over'; TT.QueueUI.refresh(); refresh(); } else startTurn(); }
 
       function doAttack() {
-        var cur = T.cur, r = C.apply(cur, tgt);
+        var cur = T.cur, r = C.apply(cur, tgt, null, { boost: spend });
         cur.face = TT.faceOf(tgt.x - cur.x, tgt.y - cur.y); view.face(cur);
         var p = view.posOf(tgt);
-        fx.damage(p, r); view.flash(tgt); camera.shake(r.kill ? 0.18 : 0.1, 0.2);
+        fx.damage(p, r); view.flash(tgt); camera.shake(r.broke ? 0.25 : r.kill ? 0.18 : 0.1, 0.2);
+        if (r.weak) fx.number(p, '¡Débil!', P.dmg[r.type], false, 0.55);
+        if (r.broke) fx.number(p, '¡ROTO!', P.state.broken, true, 1.0);
         if (r.kill) view.kill(tgt);
+        spend = 0;
         T.attackDone(); TT.QueueUI.refresh();
         mode = T.phase === 'over' ? 'over' : 'face'; tgt = null; refresh();
       }

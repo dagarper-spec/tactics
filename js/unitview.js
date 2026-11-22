@@ -84,10 +84,8 @@ window.TT = window.TT || {};
             var pulse = sel ? 1 + 0.08 * Math.sin(time * 6) : 1;
             v.ring.scale.set(pulse, pulse, 1);
             v.shadow.scale.set(1 - hop, 1 - hop, 1);
-            if (v.flash > 0) {                                   // destello rojo al recibir daño
-              v.flash -= dt;
-              v.mat.color.setHex(v.flash > 0 ? 0xff7070 : 0xf2eefa);
-            }
+            if (v.flash > 0) v.flash -= dt;                      // destello rojo al recibir daño
+            v.mat.color.setHex(v.flash > 0 ? 0xff7070 : (v.u.broken ? 0x8a98d0 : 0xf2eefa));   // azulado si está roto
             if (v.dying > 0) {                                   // desvanecer al morir
               v.dying -= dt;
               v.mat.opacity = Math.max(0, v.dying / 0.5);

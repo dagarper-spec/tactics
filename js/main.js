@@ -1,4 +1,4 @@
-// Arranque y bucle principal (delta time). Hito 3: turnos, ataque básico y previsualización de daño.
+// Arranque y bucle principal (delta time). Hito 4a: escudos, Rotura y Potenciar sobre el combate por turnos.
 window.TT = window.TT || {};
 (function () {
   function $(id) { return document.getElementById(id); }
@@ -19,13 +19,14 @@ window.TT = window.TT || {};
     var view = TT.UnitView.build(R.scene);
     var fx = TT.FX.build(R.scene);
     TT.QueueUI.init($('queue'));
-    var sel = TT.Selection.init(R.scene, terrain, view, fx, TT.Cam);
+    var badges = TT.Badges.build(R.scene, view);
+    var sel = TT.Selection.init(R.scene, terrain, view, fx, TT.Cam, badges);
     TT.Cam.bind($('game'), sel.onTap);
 
     $('rotL').addEventListener('click', function () { TT.Cam.rotate(-1); });
     $('rotR').addEventListener('click', function () { TT.Cam.rotate(1); });
     var qb = $('qual');
-    qb.textContent = 'Calidad: ' + R.q.name;
+    qb.textContent = 'Cal. ' + R.q.name;
     qb.addEventListener('click', function () {
       var o = TT.Quality.order, k = o[(o.indexOf(qKey) + 1) % o.length];
       TT.Quality.save(k); location.reload();
@@ -42,6 +43,7 @@ window.TT = window.TT || {};
       parts.update(dt, time);
       view.update(dt, TT.Cam.yaw, time);
       fx.update(dt);
+      badges.update();
       sel.update(time, dt);
       R.render();
       fpsAcc += dt; fpsN++;

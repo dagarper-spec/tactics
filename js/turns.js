@@ -14,7 +14,7 @@ window.TT = window.TT || {};
     }).map(function (o) { return o.u; });
   }
 
-  var T = TT.Turns = { round: 1, order: [], idx: 0, cur: null, phase: 'act', acted: false, winner: null };
+  var T = TT.Turns = { round: 1, order: [], idx: 0, cur: null, phase: 'act', acted: false, winner: null, skipped: [] };
 
   T.init = function () { T.round = 1; T.order = order(); T.idx = -1; T.winner = null; T.next(); };
 
@@ -26,14 +26,22 @@ window.TT = window.TT || {};
     return true;
   };
 
+  // Avanza al siguiente turno. Una unidad rota pierde ese turno y recupera todos sus escudos.
   T.next = function () {
+    T.skipped = [];
     if (T.checkOver()) return;
-    do {
-      T.idx++;
-      if (T.idx >= T.order.length) { T.round++; T.order = order(); T.idx = 0; }
-    } while (T.order[T.idx].hp <= 0);
+    for (;;) {
+      do {
+        T.idx++;
+        if (T.idx >= T.order.length) { T.round++; T.order = order(); T.idx = 0; }
+      } while (T.order[T.idx].hp <= 0);
+      var u = T.order[T.idx];
+      if (!u.broken) break;
+      u.broken = false; u.shield = u.shieldMax; T.skipped.push(u);
+    }
     T.cur = T.order[T.idx];
     T.cur.moved = false; T.cur.undo = null;
+    T.cur.boost = Math.min(TT.Bal.boostMax, T.cur.boost + 1);   // +1 punto de Potenciar por turno
     T.phase = 'act'; T.acted = false;
   };
 

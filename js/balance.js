@@ -5,8 +5,9 @@ TT.Bal = {
   heightRange: 1,       // +1 de alcance por nivel de ventaja (solo ataques a distancia)
   back: 1.3,            // espalda
   flank: 1.15,          // flanco
-  brk: 1.5,             // objetivo roto (Hito 4)
-  boostPer: 0.30,       // por punto de Potenciar (Hito 4)
+  brk: 1.5,             // objetivo roto
+  boostPer: 0.30,       // por punto de Potenciar
+  boostMax: 3,          // máximo de puntos acumulables
   cap: 3.5,             // tope del multiplicador total
   minDmg: 1,
   friendlyFire: false   // el área no daña a aliados (Hito 4); cambiable

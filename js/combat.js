@@ -44,7 +44,7 @@ window.TT = window.TT || {};
     var mH = 1 + B.heightDmg * dl;
     var orient = C.orientation(att, tgt);
     var mO = orient === 'back' ? B.back : orient === 'flank' ? B.flank : 1;
-    var mB = opts.broken ? B.brk : 1;
+    var mB = (opts.broken !== undefined ? opts.broken : tgt.broken) ? B.brk : 1;
     var mP = 1 + B.boostPer * (opts.boost || 0);
     var raw = mH * mO * mB * mP, mult = Math.min(B.cap, raw);
     var dmg = Math.max(B.minDmg, Math.round(base * mult));
@@ -55,9 +55,24 @@ window.TT = window.TT || {};
     };
   };
 
+  // ¿Este tipo de daño quita escudo ahora mismo? (no si ya está roto o sin escudos)
+  C.hitsWeak = function (tgt, type) {
+    return tgt.shieldMax > 0 && !tgt.broken && tgt.shield > 0 && tgt.weak.indexOf(type) >= 0;
+  };
+
+  // Aplica el daño y, si acierta una debilidad, quita 1 escudo y la revela. Con 0 escudos queda roto.
+  // El golpe que rompe NO recibe el x1,5 (se calcula antes de romper). Los muertos no pierden escudos.
   C.apply = function (att, tgt, sk, opts) {
-    var r = C.calc(att, tgt, sk, opts);
+    opts = opts || {};
+    var r = C.calc(att, tgt, sk, { boost: opts.boost, broken: tgt.broken });
+    var weak = C.hitsWeak(tgt, r.type);
     tgt.hp = r.hpAfter;
+    r.weak = weak; r.broke = false;
+    if (weak && tgt.hp > 0) {
+      tgt.known[r.type] = true; tgt.shield--;
+      if (tgt.shield === 0) { tgt.broken = true; r.broke = true; }
+    }
+    if (att.boost >= 0 && opts.boost) att.boost = Math.max(0, att.boost - opts.boost);
     return r;
   };
 })();

@@ -14,10 +14,10 @@ window.TT = window.TT || {};
     archer:   { name: 'Arquero',    side: 'hero',  hp: 80,  at: 20, mg: 6,  df: 8,  rs: 8,  vl: 12, mv: 4 },
     mage:     { name: 'Mago',       side: 'hero',  hp: 70,  at: 6,  mg: 22, df: 6,  rs: 14, vl: 9,  mv: 3 },
     cleric:   { name: 'Clérigo',    side: 'hero',  hp: 85,  at: 8,  mg: 18, df: 9,  rs: 16, vl: 10, mv: 4 },
-    soldier:  { name: 'Soldado',    side: 'enemy', hp: 100, at: 17, mg: 4,  df: 14, rs: 6,  vl: 7,  mv: 4 },
-    crossbow: { name: 'Ballestero', side: 'enemy', hp: 70,  at: 18, mg: 4,  df: 8,  rs: 8,  vl: 11, mv: 3 },
-    sorcerer: { name: 'Hechicero',  side: 'enemy', hp: 65,  at: 5,  mg: 20, df: 6,  rs: 14, vl: 9,  mv: 3 },
-    captain:  { name: 'Capitán',    side: 'enemy', hp: 140, at: 20, mg: 6,  df: 18, rs: 10, vl: 6,  mv: 3 }
+    soldier:  { weak: ['pierce', 'fire', 'ice'], name: 'Soldado',    side: 'enemy', hp: 100, at: 17, mg: 4,  df: 14, rs: 6,  vl: 7,  mv: 4 },
+    crossbow: { weak: ['slash', 'light'], name: 'Ballestero', side: 'enemy', hp: 70,  at: 18, mg: 4,  df: 8,  rs: 8,  vl: 11, mv: 3 },
+    sorcerer: { weak: ['blunt', 'pierce'], name: 'Hechicero',  side: 'enemy', hp: 65,  at: 5,  mg: 20, df: 6,  rs: 14, vl: 9,  mv: 3 },
+    captain:  { weak: ['ice', 'light', 'blunt'], name: 'Capitán',    side: 'enemy', hp: 140, at: 20, mg: 6,  df: 18, rs: 10, vl: 6,  mv: 3 }
   };
 
   var U = TT.Units = { list: [] };
@@ -31,7 +31,9 @@ window.TT = window.TT || {};
         U.list.push({
           id: t, type: t, name: d.name, side: d.side, hp: d.hp, maxHp: d.hp,
           st: { at: d.at, mg: d.mg, df: d.df, rs: d.rs, vl: d.vl, mv: d.mv },
-          x: grp[t][0], y: grp[t][1], face: g[1], moved: false, undo: null
+          x: grp[t][0], y: grp[t][1], face: g[1], moved: false, undo: null,
+          weak: (d.weak || []).slice(), shield: (d.weak || []).length, shieldMax: (d.weak || []).length,
+          known: {}, broken: false, boost: 0
         });
       });
     });
