@@ -32,19 +32,21 @@ window.TT = window.TT || {};
         v.pick.position.y = UA.size(u.type).h * UA.size(u.type).s * 0.45; v.pick.userData.unit = u;
         v.group.add(v.shadow, v.ring, v.sprite, v.pick);
         v.group.position.copy(v.pos);
-        v.flash = 0; v.dying = 0; v.hurt = 0; v.dmax = 0.5;
+        v.flash = 0; v.dying = 0; v.hurt = 0; v.dmax = 1.0; v.anim = null; v.gt = 0;
         scene.add(v.group);
         items.push(v); byId[u.id] = v; picks.push(v.pick);
       });
 
       var V = {
         picks: picks, items: items,
-        busy: function () { return items.some(function (v) { return !!v.path; }); },
+        busy: function () { return items.some(function (v) { return !!v.path || v.atk > 0; }); },
         select: function (u) { selected = u; },
         face: function (u) { byId[u.id].face = u.face; },
         flash: function (u) { byId[u.id].flash = 0.3; byId[u.id].hurt = 0.35; },
-        kill: function (u) { var v = byId[u.id]; v.dmax = UA.has(u.type, 'die0') ? 1.1 : 0.5; v.dying = v.dmax; },
-        attack: function (u) { byId[u.id].atk = 0.5; },
+        kill: function (u) { var v = byId[u.id]; v.dmax = UA.has(u.type, 'die0') ? 1.1 : 1.0; v.dying = v.dmax; },
+        attack: function (u, skillId) {                       // arranca la animación de la habilidad
+          var v = byId[u.id]; v.anim = TT.Anim.kindOf(skillId); v.adur = TT.Anim.dur(v.anim); v.atk = v.adur; v.gcol = TT.Anim.glowColor(skillId); v.gtype = TT.Skills[skillId].type || 'light';
+        },
         // Posición actual en el mundo (para efectos).
         posOf: function (u) { return byId[u.id].pos; },
         // Coloca la vista en la casilla lógica actual (tras deshacer).
@@ -76,21 +78,27 @@ window.TT = window.TT || {};
               }
             }
             v.group.position.copy(v.pos);
-            if (v.atk > 0) {                                     // acometida breve hacia donde mira
-              v.atk -= dt; var pg = Math.max(0, Math.min(1, 1 - v.atk / 0.5)), fd = TT.DIR[v.face];
-              var q = pg < 0.4 ? -0.05 * pg / 0.4 : pg < 0.75 ? -0.05 + 0.3 * (pg - 0.4) / 0.35 : 0.25 * (1 - (pg - 0.75) / 0.25);
-              v.group.position.x += fd[0] * q; v.group.position.z += fd[1] * q;
+            var an = null, fd = TT.DIR[v.face];
+            if (v.atk > 0) {                                     // animación de la habilidad (avance, salto, giro, brillo)
+              v.atk -= dt; an = TT.Anim.sample(v.anim, 1 - Math.max(0, v.atk) / v.adur);
+              v.group.position.x += fd[0] * an.fwd; v.group.position.z += fd[1] * an.fwd;
+              if (an.glow && (v.gt -= dt) <= 0) { v.gt = 0.1; TT.Impact.burst({ x: v.pos.x, y: v.pos.y + 0.35, z: v.pos.z }, v.gtype, an.glow > 1, v.gcol); }
+            }
+            if (v.hurt > 0 && !UA.has(v.u.type, 'hurt')) {       // retroceso al recibir daño (si no hay fotograma propio)
+              var rc = -0.09 * Math.sin(Math.PI * (1 - v.hurt / 0.35));
+              v.group.position.x += fd[0] * rc; v.group.position.z += fd[1] * rc;
             }
             // Frente/espalda según hacia dónde mira respecto a la cámara; espejo según el lado de la pantalla.
             var f = TT.DIR[v.face];
             var toCam = f[0] * sy + f[1] * cy, side = f[0] * cy - f[1] * sy;
             if (v.hurt > 0) v.hurt -= dt;
-            var pose = v.dying > 0 && v.dmax > 1 ? 'die' + Math.min(8, Math.floor((1 - v.dying / v.dmax) / 0.75 * 9)) : v.hurt > 0 && !v.path && v.atk <= 0 ? 'hurt' : v.atk > 0.075 ? (v.atk > 0.3 ? 'atk0' : 'atk1') : v.path ? 'walk' + ((v.idx % 2) * 2 + (v.t < 0.5 ? 0 : 1)) : ((time * 1.8 + v.i * 0.7) % 2 < 1 ? 'idle0' : 'idle1');
+            var pose = v.dying > 0 && v.dmax > 1 ? 'die' + Math.min(8, Math.floor((1 - v.dying / v.dmax) / 0.75 * 9)) : v.hurt > 0 && !v.path && v.atk <= 0 && UA.has(v.u.type, 'hurt') ? 'hurt' : an ? an.pose : v.path ? 'walk' + ((v.idx % 2) * 2 + (v.t < 0.5 ? 0 : 1)) : ((time * 1.8 + v.i * 0.7) % 2 < 1 ? 'idle0' : 'idle1');
             var m = UA.tex(v.u.type, toCam < 0, pose);
             if (v.mat.map !== m) v.mat.map = m;
-            v.sprite.scale.set(side < 0 ? -v.big : v.big, v.big, 1);
+            v.sprite.scale.set((side < 0 ? -v.big : v.big) * (an ? an.sx : 1), v.big * (an ? an.sy : 1), 1);
             v.sprite.rotation.y = yaw;
-            v.sprite.position.y = hop;
+            v.sprite.position.y = hop + (an ? an.up : 0);
+            v.sprite.rotation.z = 0;
             var sel = selected === v.u;
             v.ring.material.color.setHex(sel ? hex(P.side.select) : v.baseCol);
             var pulse = sel ? 1 + 0.08 * Math.sin(time * 6) : 1;
@@ -100,7 +108,8 @@ window.TT = window.TT || {};
             v.mat.color.setHex(v.flash > 0 ? 0xff7070 : (v.u.broken ? 0x8a98d0 : 0xf2eefa));   // azulado si está roto
             if (v.dying > 0) {                                   // desvanecer al morir
               v.dying -= dt;
-              v.mat.opacity = Math.max(0, Math.min(1, v.dying / (v.dmax > 1 ? 0.3 : 0.5)));
+              v.mat.opacity = Math.max(0, Math.min(1, v.dying / 0.3));
+              if (!UA.has(v.u.type, 'die0')) v.sprite.rotation.z = (side < 0 ? 1 : -1) * 1.45 * Math.min(1, (1 - v.dying / v.dmax) / 0.55);   // se desploma
               if (v.dying <= 0) { v.dying = -1; v.group.visible = false; }
             }
           }

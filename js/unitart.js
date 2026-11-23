@@ -9,7 +9,8 @@ window.TT = window.TT || {};
     idle0: { bob: 0, l: 0, r: 0, al: 0, ar: 0 }, idle1: { bob: 1, l: 0, r: 0, al: 0, ar: 0 },
     walk0: { bob: 0, l: 2, r: 0, al: 1, ar: -1 }, walk1: { bob: 1, l: 0, r: 0, al: 0, ar: 0 },
     walk2: { bob: 0, l: 0, r: 2, al: -1, ar: 1 }, walk3: { bob: 1, l: 0, r: 0, al: 0, ar: 0 },
-    atk0: { bob: 0, l: 0, r: 0, al: 0, ar: -6, atk: 1 }, atk1: { bob: 1, l: 0, r: 0, al: 0, ar: -3, atk: 1 }
+    atk0: { bob: 0, l: 0, r: 0, al: 0, ar: -6, atk: 1 }, atk1: { bob: 1, l: 0, r: 0, al: 0, ar: -3, atk: 1 },
+    cast: { bob: 0, l: 0, r: 0, al: 0, ar: -7, atk: 1, both: 1 }
   };
   U.poses = Object.keys(POSES);
 
@@ -76,7 +77,7 @@ window.TT = window.TT || {};
     A.box(g, 14, 19 + by, 12, 12 - by, cl, true);
     if (!S.robe) { A.px(g, 14, 29, bt[2], 12, 1); A.px(g, 14, 30, bt[3], 12, 1); if (!back) A.px(g, 19, 29, '#E0B24D', 2, 2); }
     if (S.post) S.post(g, back, p, by);
-    var ar = p.ar, al = p.al, cast = S.cast && p.atk;
+    var ar = p.ar, al = p.al, cast = (S.cast || p.both) && p.atk;
     arm(g, S, 11, cast ? -6 : al, by); arm(g, S, 26, ar, by);
     if (S.pads) { var pd = A.ramp(S.pads); A.blob(g, 10, 18 + by, 6, 5, pd); A.blob(g, 24, 18 + by, 6, 5, pd); }
     head(g, S, back, by);
@@ -96,6 +97,7 @@ window.TT = window.TT || {};
   // Hoja de sprites: elige el fotograma de la pose (con alternativas si falta) y lo copia a un canvas.
   function frameFor(d, back, pose) {
     var s = back ? 'B' : 'F', f = d.frames;
+    if (pose === 'cast') pose = 'atk0';                  // las hojas sin animación de conjuro usan la de ataque
     if (f[pose]) return pose;
     if (f[pose + s]) return pose + s;
     return f['idle0' + s] ? 'idle0' + s : 'idle0F';
