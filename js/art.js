@@ -48,6 +48,25 @@ window.TT = window.TT || {};
   // Espeja filas de texto (para la vista de espaldas).
   A.flip = function (rows) { return rows.map(function (r) { return r.split('').reverse().join(''); }); };
 
+  // Línea gruesa (cuadrados de t x t a lo largo del trazo).
+  A.line = function (g, x0, y0, x1, y1, c, t) {
+    t = t || 1; var n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1) * 2;
+    for (var i = 0; i <= n; i++) A.px(g, Math.round(x0 + (x1 - x0) * i / n - (t - 1) / 2), Math.round(y0 + (y1 - y0) * i / n - (t - 1) / 2), c, t, t);
+  };
+  // Espada en la mano (hx,hy) con ángulo th (grados, 0 = arriba, positivo = hacia la derecha) y largo L.
+  A.sword = function (g, hx, hy, th, L) {
+    var r = th * Math.PI / 180, dx = Math.sin(r), dy = -Math.cos(r), px = Math.cos(r), py = Math.sin(r);
+    function at(d, o) { return [hx + dx * d + px * o, hy + dy * d + py * o]; }
+    var a = at(5, 0), b = at(L, 0), c;
+    A.line(g, a[0], a[1], b[0], b[1], '#8792A3', 3);                         // filo en sombra
+    c = at(5, -1); b = at(L - 1, -1); A.line(g, c[0], c[1], b[0], b[1], '#C9D0DA', 2);
+    c = at(6, -1); b = at(L - 2, -1); A.line(g, c[0], c[1], b[0], b[1], '#F4F7FB', 1);
+    c = at(-3, 0); b = at(5, 0); A.line(g, c[0], c[1], b[0], b[1], '#6B4A2F', 2);   // empuñadura
+    c = at(4, -5); b = at(4, 5); A.line(g, c[0], c[1], b[0], b[1], '#E0B24D', 2);    // guarda
+    c = at(4, -5); A.px(g, Math.round(c[0]), Math.round(c[1]), '#F5D060');
+    c = at(-4, 0); A.px(g, Math.round(c[0]), Math.round(c[1]), '#E0B24D', 2, 2);     // pomo
+  };
+
   // Contorno selectivo: cada píxel de borde toma el color oscurecido del relleno vecino.
   A.outline = function (src, dark) {
     var w = src.width, h = src.height, c = PX.canvas(w, h), g = c.getContext('2d');

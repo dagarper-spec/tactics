@@ -7,8 +7,9 @@ window.TT = window.TT || {};
   var Specs = TT.Specs = TT.Specs || {};
   var POSES = {
     idle0: { bob: 0, l: 0, r: 0, al: 0, ar: 0 }, idle1: { bob: 1, l: 0, r: 0, al: 0, ar: 0 },
-    walk0: { bob: 0, l: 2, r: 0, al: 1, ar: -1 }, walk1: { bob: 0, l: 0, r: 2, al: -1, ar: 1 },
-    atk: { bob: 0, l: 0, r: 0, al: 0, ar: -6, atk: 1 }
+    walk0: { bob: 0, l: 2, r: 0, al: 1, ar: -1 }, walk1: { bob: 1, l: 0, r: 0, al: 0, ar: 0 },
+    walk2: { bob: 0, l: 0, r: 2, al: -1, ar: 1 }, walk3: { bob: 1, l: 0, r: 0, al: 0, ar: 0 },
+    atk0: { bob: 0, l: 0, r: 0, al: 0, ar: -6, atk: 1 }, atk1: { bob: 1, l: 0, r: 0, al: 0, ar: -3, atk: 1 }
   };
   U.poses = Object.keys(POSES);
 
@@ -96,12 +97,13 @@ window.TT = window.TT || {};
     pose = pose || 'idle0';
     var k = type + (back ? 'B' : 'F') + pose;
     if (!U.cache[k]) {
-      var c = PX.canvas(W, H), g = c.getContext('2d');
-      figure(g, Specs[type], !!back, POSES[pose]);
+      var Sp = Specs[type], c = PX.canvas(Sp.w || W, Sp.h || H), g = c.getContext('2d');
+      if (Sp.draw) Sp.draw(g, !!back, pose); else figure(g, Sp, !!back, POSES[pose]);
       U.cache[k] = A.outline(c);
     }
     return U.cache[k];
   };
+  U.size = function (type) { var Sp = Specs[type]; return { w: Sp.w || W, h: Sp.h || H, s: Sp.sc || 1 / 40 }; };
   U.tex = function (type, back, pose) {
     var k = type + (back ? 'B' : 'F') + (pose || 'idle0');
     return U.texs[k] || (U.texs[k] = PX.tex(U.canvas(type, back, pose)));

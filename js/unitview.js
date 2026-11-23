@@ -10,7 +10,11 @@ window.TT = window.TT || {};
     build: function (scene) {
       var items = [], byId = {}, picks = [], selected = null;
       var shadowTex = TT.Sprites.shadow(), ringGeo = new THREE.RingGeometry(0.3, 0.42, 24);
-      var geo = new THREE.PlaneGeometry(UA.W * S, UA.H * S); geo.translate(0, UA.H * S / 2 - 3 * S, 0);
+      var geos = {};
+      function geoFor(t) {
+        if (!geos[t]) { var z = UA.size(t); geos[t] = new THREE.PlaneGeometry(z.w * z.s, z.h * z.s); geos[t].translate(0, z.h * z.s / 2 - 3 * z.s, 0); }
+        return geos[t];
+      }
       var shGeo = new THREE.PlaneGeometry(0.9, 0.9);
 
       TT.Units.list.forEach(function (u, i) {
@@ -18,14 +22,14 @@ window.TT = window.TT || {};
         v.atk = 0; v.walk = 0; v.big = u.type === 'captain' ? 1.15 : 1;
         v.group = new THREE.Group();
         v.mat = new THREE.MeshBasicMaterial({ map: UA.tex(u.type, false), transparent: true, alphaTest: 0.4, side: THREE.DoubleSide, color: 0xf2eefa });
-        v.sprite = new THREE.Mesh(geo, v.mat);
+        v.sprite = new THREE.Mesh(geoFor(u.type), v.mat);
         v.baseCol = hex(u.side === 'hero' ? P.side.hero : P.side.enemy);
         v.ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: v.baseCol, transparent: true, opacity: 0.9, depthWrite: false }));
         v.ring.rotation.x = -Math.PI / 2; v.ring.position.y = 0.03;
         v.shadow = new THREE.Mesh(shGeo, new THREE.MeshBasicMaterial({ map: shadowTex, color: 0x000000, transparent: true, opacity: 0.35, depthWrite: false }));
         v.shadow.rotation.x = -Math.PI / 2; v.shadow.position.y = 0.02;
-        v.pick = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.1, 0.7), new THREE.MeshBasicMaterial({ visible: false }));
-        v.pick.position.y = 0.55; v.pick.userData.unit = u;
+        v.pick = new THREE.Mesh(new THREE.BoxGeometry(0.7, UA.size(u.type).h * UA.size(u.type).s * 0.9, 0.7), new THREE.MeshBasicMaterial({ visible: false }));
+        v.pick.position.y = UA.size(u.type).h * UA.size(u.type).s * 0.45; v.pick.userData.unit = u;
         v.group.add(v.shadow, v.ring, v.sprite, v.pick);
         v.group.position.copy(v.pos);
         v.flash = 0; v.dying = 0;
@@ -73,13 +77,14 @@ window.TT = window.TT || {};
             }
             v.group.position.copy(v.pos);
             if (v.atk > 0) {                                     // acometida breve hacia donde mira
-              v.atk -= dt; var q = Math.sin(Math.PI * Math.max(0, Math.min(1, 1 - v.atk / 0.5))) * 0.2, fd = TT.DIR[v.face];
+              v.atk -= dt; var pg = Math.max(0, Math.min(1, 1 - v.atk / 0.5)), fd = TT.DIR[v.face];
+              var q = pg < 0.4 ? -0.05 * pg / 0.4 : pg < 0.75 ? -0.05 + 0.3 * (pg - 0.4) / 0.35 : 0.25 * (1 - (pg - 0.75) / 0.25);
               v.group.position.x += fd[0] * q; v.group.position.z += fd[1] * q;
             }
             // Frente/espalda según hacia dónde mira respecto a la cámara; espejo según el lado de la pantalla.
             var f = TT.DIR[v.face];
             var toCam = f[0] * sy + f[1] * cy, side = f[0] * cy - f[1] * sy;
-            var pose = v.atk > 0.12 ? 'atk' : v.path ? (v.idx % 2 ? 'walk1' : 'walk0') : ((time * 1.8 + v.i * 0.7) % 2 < 1 ? 'idle0' : 'idle1');
+            var pose = v.atk > 0.075 ? (v.atk > 0.3 ? 'atk0' : 'atk1') : v.path ? 'walk' + ((v.idx % 2) * 2 + (v.t < 0.5 ? 0 : 1)) : ((time * 1.8 + v.i * 0.7) % 2 < 1 ? 'idle0' : 'idle1');
             var m = UA.tex(v.u.type, toCam < 0, pose);
             if (v.mat.map !== m) v.mat.map = m;
             v.sprite.scale.set(side < 0 ? -v.big : v.big, v.big, 1);
