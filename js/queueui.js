@@ -8,9 +8,7 @@ window.TT = window.TT || {};
     var d = document.createElement('div');
     d.className = 'qi ' + u.side + (cls ? ' ' + cls : '');
     d.title = u.name;
-    var src = TT.UnitArt.canvas(u.type, false), c = document.createElement('canvas');
-    c.width = 28; c.height = 34;                          // retrato: cabeza y torso
-    c.getContext('2d').drawImage(src, (src.width - 28) / 2, 0, 28, 34, 0, 0, 28, 34);
+    var c = TT.UnitArt.portrait(u.type, TT.UnitArt.canvas(u.type, false));
     d.appendChild(c);
     var bar = document.createElement('i'), fill = document.createElement('b');
     fill.style.width = Math.max(0, Math.round(100 * u.hp / u.maxHp)) + '%';

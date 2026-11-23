@@ -12,7 +12,7 @@ window.TT = window.TT || {};
       var shadowTex = TT.Sprites.shadow(), ringGeo = new THREE.RingGeometry(0.3, 0.42, 24);
       var geos = {};
       function geoFor(t) {
-        if (!geos[t]) { var z = UA.size(t); geos[t] = new THREE.PlaneGeometry(z.w * z.s, z.h * z.s); geos[t].translate(0, z.h * z.s / 2 - 3 * z.s, 0); }
+        if (!geos[t]) { var z = UA.size(t); geos[t] = new THREE.PlaneGeometry(z.w * z.s, z.h * z.s); geos[t].translate(0, z.h * z.s / 2 - (z.m || 3) * z.s, 0); }
         return geos[t];
       }
       var shGeo = new THREE.PlaneGeometry(0.9, 0.9);
@@ -32,7 +32,7 @@ window.TT = window.TT || {};
         v.pick.position.y = UA.size(u.type).h * UA.size(u.type).s * 0.45; v.pick.userData.unit = u;
         v.group.add(v.shadow, v.ring, v.sprite, v.pick);
         v.group.position.copy(v.pos);
-        v.flash = 0; v.dying = 0;
+        v.flash = 0; v.dying = 0; v.hurt = 0; v.dmax = 0.5;
         scene.add(v.group);
         items.push(v); byId[u.id] = v; picks.push(v.pick);
       });
@@ -42,8 +42,8 @@ window.TT = window.TT || {};
         busy: function () { return items.some(function (v) { return !!v.path; }); },
         select: function (u) { selected = u; },
         face: function (u) { byId[u.id].face = u.face; },
-        flash: function (u) { byId[u.id].flash = 0.3; },
-        kill: function (u) { byId[u.id].dying = 0.5; },
+        flash: function (u) { byId[u.id].flash = 0.3; byId[u.id].hurt = 0.35; },
+        kill: function (u) { var v = byId[u.id]; v.dmax = UA.has(u.type, 'die0') ? 1.1 : 0.5; v.dying = v.dmax; },
         attack: function (u) { byId[u.id].atk = 0.5; },
         // Posición actual en el mundo (para efectos).
         posOf: function (u) { return byId[u.id].pos; },
@@ -84,7 +84,8 @@ window.TT = window.TT || {};
             // Frente/espalda según hacia dónde mira respecto a la cámara; espejo según el lado de la pantalla.
             var f = TT.DIR[v.face];
             var toCam = f[0] * sy + f[1] * cy, side = f[0] * cy - f[1] * sy;
-            var pose = v.atk > 0.075 ? (v.atk > 0.3 ? 'atk0' : 'atk1') : v.path ? 'walk' + ((v.idx % 2) * 2 + (v.t < 0.5 ? 0 : 1)) : ((time * 1.8 + v.i * 0.7) % 2 < 1 ? 'idle0' : 'idle1');
+            if (v.hurt > 0) v.hurt -= dt;
+            var pose = v.dying > 0 && v.dmax > 1 ? 'die' + Math.min(8, Math.floor((1 - v.dying / v.dmax) / 0.75 * 9)) : v.hurt > 0 && !v.path && v.atk <= 0 ? 'hurt' : v.atk > 0.075 ? (v.atk > 0.3 ? 'atk0' : 'atk1') : v.path ? 'walk' + ((v.idx % 2) * 2 + (v.t < 0.5 ? 0 : 1)) : ((time * 1.8 + v.i * 0.7) % 2 < 1 ? 'idle0' : 'idle1');
             var m = UA.tex(v.u.type, toCam < 0, pose);
             if (v.mat.map !== m) v.mat.map = m;
             v.sprite.scale.set(side < 0 ? -v.big : v.big, v.big, 1);
@@ -99,7 +100,7 @@ window.TT = window.TT || {};
             v.mat.color.setHex(v.flash > 0 ? 0xff7070 : (v.u.broken ? 0x8a98d0 : 0xf2eefa));   // azulado si está roto
             if (v.dying > 0) {                                   // desvanecer al morir
               v.dying -= dt;
-              v.mat.opacity = Math.max(0, v.dying / 0.5);
+              v.mat.opacity = Math.max(0, Math.min(1, v.dying / (v.dmax > 1 ? 0.3 : 0.5)));
               if (v.dying <= 0) { v.dying = -1; v.group.visible = false; }
             }
           }

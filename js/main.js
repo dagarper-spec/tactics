@@ -8,6 +8,10 @@ window.TT = window.TT || {};
       $('info').textContent = 'No se pudo cargar three.js. Comprueba la conexión.';
       return;
     }
+    TT.Sheets.load(boot);
+  }
+
+  function boot() {
     var qKey = TT.Quality.pick();
     var R = TT.Render.init($('game'), qKey);
     var terrain = TT.Terrain.build(R.scene, R.q);

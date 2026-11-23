@@ -93,19 +93,46 @@ window.TT = window.TT || {};
     A.stamp(g, hx - gx, hy - o.grip[1] + dy, rows, null, m);
   }
 
+  // Hoja de sprites: elige el fotograma de la pose (con alternativas si falta) y lo copia a un canvas.
+  function frameFor(d, back, pose) {
+    var s = back ? 'B' : 'F', f = d.frames;
+    if (f[pose]) return pose;
+    if (f[pose + s]) return pose + s;
+    return f['idle0' + s] ? 'idle0' + s : 'idle0F';
+  }
+  U.has = function (type, pose) { return TT.Sheets.has(type) ? !!(TT.SheetData[type].frames[pose] || TT.SheetData[type].frames[pose + 'F']) : false; };
+  // Retrato para la cola de turnos: cabeza y torso, 28x34.
+  U.portrait = function (type, src) {
+    var c = PX.canvas(28, 34), g = c.getContext('2d'), z = TT.Sheets.has(type) ? TT.SheetData[type] : null;
+    if (z) g.drawImage(src, z.cell / 2 - 14, z.feet - 55, 28, 34, 0, 0, 28, 34); else g.drawImage(src, (src.width - 28) / 2, 0, 28, 34, 0, 0, 28, 34);
+    return c;
+  };
+
   U.canvas = function (type, back, pose) {
     pose = pose || 'idle0';
+    if (TT.Sheets.has(type)) {
+      var d = TT.SheetData[type], fn = frameFor(d, back, pose), k2 = type + '|' + fn;
+      if (!U.cache[k2]) {
+        var f = d.frames[fn], cv = PX.canvas(d.cell, d.cell);
+        cv.getContext('2d').drawImage(TT.Sheets.img[type], f[0] * d.cell, f[1] * d.cell, d.cell, d.cell, 0, 0, d.cell, d.cell);
+        U.cache[k2] = cv;
+      }
+      return U.cache[k2];
+    }
     var k = type + (back ? 'B' : 'F') + pose;
     if (!U.cache[k]) {
       var Sp = Specs[type], c = PX.canvas(Sp.w || W, Sp.h || H), g = c.getContext('2d');
-      if (Sp.draw) Sp.draw(g, !!back, pose); else figure(g, Sp, !!back, POSES[pose]);
+      if (Sp.draw) Sp.draw(g, !!back, pose); else figure(g, Sp, !!back, POSES[pose] || POSES.idle0);
       U.cache[k] = A.outline(c);
     }
     return U.cache[k];
   };
-  U.size = function (type) { var Sp = Specs[type]; return { w: Sp.w || W, h: Sp.h || H, s: Sp.sc || 1 / 40 }; };
+  U.size = function (type) {
+    if (TT.Sheets.has(type)) { var d = TT.SheetData[type]; return { w: d.cell, h: d.cell, s: 1 / 42, m: d.cell - d.feet - 1 }; }
+    var Sp = Specs[type]; return { w: Sp.w || W, h: Sp.h || H, s: Sp.sc || 1 / 40 }; };
   U.tex = function (type, back, pose) {
     var k = type + (back ? 'B' : 'F') + (pose || 'idle0');
+    if (TT.Sheets.has(type)) k = type + '|' + frameFor(TT.SheetData[type], back, pose || 'idle0');
     return U.texs[k] || (U.texs[k] = PX.tex(U.canvas(type, back, pose)));
   };
 })();
