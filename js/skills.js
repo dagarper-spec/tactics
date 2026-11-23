@@ -46,7 +46,7 @@ window.TT = window.TT || {};
     soldier:  ['stab'],
     crossbow: ['bolt'],
     sorcerer: ['dark', 'blaze'],
-    captain:  ['cleave', 'taunt']
+    captain:  ['cleave']
   };
   TT.Basic = {};
   Object.keys(TT.Kit).forEach(function (t) { TT.Basic[t] = TT.Kit[t][0]; });
