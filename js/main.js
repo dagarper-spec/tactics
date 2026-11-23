@@ -18,6 +18,7 @@ window.TT = window.TT || {};
     TT.Units.init();
     var view = TT.UnitView.build(R.scene);
     var fx = TT.FX.build(R.scene);
+    TT.Impact.build(R.scene);
     TT.QueueUI.init($('queue'));
     var badges = TT.Badges.build(R.scene, view);
     var hl = TT.Highlight.build(R.scene);
@@ -26,6 +27,13 @@ window.TT = window.TT || {};
 
     $('rotL').addEventListener('click', function () { TT.Cam.rotate(-1); });
     $('rotR').addEventListener('click', function () { TT.Cam.rotate(1); });
+    var A = TT.Audio; A.init();
+    var sb = $('snd');
+    function sndLook() { sb.style.opacity = A.enabled ? 1 : 0.4; sb.textContent = A.enabled ? '\u266A' : '\u2715'; }
+    sndLook();
+    sb.addEventListener('click', function () { A.unlock(); A.toggle(); sndLook(); if (A.enabled) A.play('ui_select'); });
+    function first() { A.unlock(); A.playMusic('music_battle', true); document.removeEventListener('pointerdown', first); }
+    document.addEventListener('pointerdown', first);
     var qb = $('qual');
     qb.textContent = 'Cal. ' + R.q.name;
     qb.addEventListener('click', function () {
@@ -37,7 +45,9 @@ window.TT = window.TT || {};
     var last = performance.now(), time = 0, fpsAcc = 0, fpsN = 0, fpsEl = $('fps');
     function frameLoop(now) {
       requestAnimationFrame(frameLoop);
-      var dt = Math.max(0, Math.min(0.1, (now - last) / 1000)); last = now; time += dt;
+      var raw = Math.max(0, Math.min(0.1, (now - last) / 1000)); last = now;
+      var dt = raw * TT.Impact.scale(raw); time += dt;
+      TT.Impact.update(raw);
       TT.Cam.update(dt);
       terrain.update(dt);
       scenery.update(dt, TT.Cam.yaw);

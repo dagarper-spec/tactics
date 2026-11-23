@@ -63,7 +63,7 @@ window.TT = window.TT || {};
               hop = Math.sin(Math.PI * t) * (0.16 + dy * 0.5);
               v.face = TT.faceOf(b.x - a.x, b.z - a.z);
               if (v.t >= 1) {
-                v.idx++; v.t = 0;
+                v.idx++; v.t = 0; TT.Audio.play('step', 0.7);
                 if (v.idx >= v.path.length - 1) {
                   v.pos.copy(v.path[v.path.length - 1]); v.path = null;
                   if (v.done) { var d = v.done; v.done = null; d(); }

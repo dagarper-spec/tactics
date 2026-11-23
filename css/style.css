@@ -58,4 +58,14 @@ button:active { background: var(--gold); color: var(--bg); }
 #fps { color: var(--dim); font-size: 10px; min-width: 38px; text-align: right; flex: none; }
 #title { color: var(--gold); letter-spacing: 0.03em; }
 @media (max-width: 520px) { #hud { font-size: 13px; right: 12px; } }
+#info .row, #info .hp, #info .chips { margin: 2px 0; }
+#info .dim, .chips { color: var(--dim); font-size: 12px; }
+#info .hero { color: #7DB8F5; } #info .enemy { color: #F0807A; }
+#info .gold { color: #F5D060; letter-spacing: 2px; } #info .broken { color: #FF3B6B; }
+#info .rd { background: var(--panel2); border: 1px solid var(--gold); border-radius: 4px; padding: 0 5px; margin-right: 6px; font-size: 12px; color: var(--gold); }
+.tag { background: var(--panel2); border-radius: 3px; padding: 0 5px; margin-left: 4px; font-size: 11px; }
+.hp { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.hp i { flex: 1; max-width: 140px; height: 7px; background: #14121F; border-radius: 3px; overflow: hidden; }
+.hp i b { display: block; height: 100%; background: #5BD16F; } .hp i b.low { background: #E5534B; }
+#info small { color: var(--dim); }
 /* FIN DE ARCHIVO */
