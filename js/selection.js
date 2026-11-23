@@ -97,7 +97,7 @@ window.TT = window.TT || {};
         S.play('ui_confirm');
         var cur = T.cur, res = A.resolve(cur, sk, aim, spend);
         if (aim && (aim.x !== cur.x || aim.y !== cur.y)) { cur.face = TT.faceOf(aim.x - cur.x, aim.y - cur.y); view.face(cur); }
-        play(res);
+        view.attack(cur); play(res);
         spend = 0; T.attackDone(); TT.QueueUI.refresh();
         mode = T.phase === 'over' ? 'over' : (sk.retreat ? 'retreat' : 'face');
         refresh();
@@ -162,7 +162,7 @@ window.TT = window.TT || {};
           later(1.1, function () {
             var res = A.resolve(cur, s, a, plan.spend);
             if (a && (a.x !== cur.x || a.y !== cur.y)) { cur.face = TT.faceOf(a.x - cur.x, a.y - cur.y); view.face(cur); }
-            play(res); hl.clear(); T.attackDone(); badges.refresh(); TT.QueueUI.refresh();
+            view.attack(cur); play(res); hl.clear(); T.attackDone(); badges.refresh(); TT.QueueUI.refresh();
             if (T.phase === 'over') later(1.1, function () { mode = 'over'; refresh(); });
             else later(1.3, finish);
           });

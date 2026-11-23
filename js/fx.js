@@ -30,7 +30,7 @@ window.TT = window.TT || {};
         number: function (pos, text, color, big, dy) {
           var p = pool[cursor]; cursor = (cursor + 1) % N;
           draw(p, String(text), color, big ? 40 : 30);
-          p.y0 = pos.y + 1.2 + (dy || 0); p.s.position.set(pos.x, p.y0, pos.z); p.life = p.max = big ? 1.1 : 0.9; p.s.visible = true;
+          p.y0 = pos.y + 1.4 + (dy || 0); p.s.position.set(pos.x, p.y0, pos.z); p.life = p.max = big ? 1.1 : 0.9; p.s.visible = true;
         },
         damage: function (pos, r) {
           var crit = r.orient === 'back' || r.orient === 'flank';
