@@ -45,24 +45,24 @@ window.TT = window.TT || {};
         if (mode === 'move') {
           reach = cur.moved ? [] : U.reach(cur);
           reach.forEach(function (r) { if (r.c > 0) hl.add(r.x, r.y, 'move'); });
-          HUD.text(head + '<br>' + HUD.card(insp || cur) + (cur.moved ? '' : '<br><span class="dim">Toca una casilla azul para moverte.</span>'));
-          btn.push({ label: 'Atacar', fn: function () { choose(kit[0]); } });
-          if (kit.length > 1) btn.push({ label: 'Habilidades', fn: function () { mode = 'menu'; refresh(); } });
-          btn.push({ label: 'Esperar', fn: function () { T.wait(); mode = 'face'; refresh(); } });
-          if (cur.moved) btn.push({ label: 'Deshacer', fn: function () { S.play('ui_cancel'); U.undoMove(cur); view.snap(cur); refresh(); } });
+          HUD.text(head + '<br>' + HUD.card(insp || cur) + (cur.moved ? '' : '<br><span class="dim">Toca una casilla azul para moverte.</span>') + HUD.recap());
+          btn.push({ label: 'Atacar', sub: TT.TypeNames[kit[0].type] || '', fn: function () { choose(kit[0]); } });
+          if (kit.length > 1) btn.push({ label: 'Habilidades', sub: (kit.length - 1) + ' disponibles', fn: function () { mode = 'menu'; refresh(); } });
+          btn.push({ label: 'Esperar', sys: 1, fn: function () { T.wait(); mode = 'face'; refresh(); } });
+          if (cur.moved) btn.push({ label: 'Deshacer', sys: 1, fn: function () { S.play('ui_cancel'); U.undoMove(cur); view.snap(cur); refresh(); } });
         } else if (mode === 'menu') {
           HUD.text(head + '<br><span class="dim">Elige habilidad (⟳ = recarga).</span>');
           btn = kit.slice(1).map(function (s) {
             var cd = A.cd(cur, s);
-            return { label: s.name + (cd ? ' (' + cd + ')' : ''), off: !A.available(cur, s), fn: function () { choose(s); } };
+            return { label: s.name, sub: (TT.TypeNames[s.type] || (s.kind === 'heal' ? 'Curación' : 'Apoyo')) + (cd ? ' · ⟳' + cd : ''), off: !A.available(cur, s), fn: function () { choose(s); } };
           });
-          btn.push({ label: 'Atrás', fn: function () { mode = 'move'; refresh(); } });
+          btn.push({ label: 'Atrás', sys: 1, fn: function () { mode = 'move'; refresh(); } });
         } else if (mode === 'aim') {
           var aims = A.aims(cur, sk), single = sk.shape === 'single';
           aims.forEach(function (a) { hl.add(a.x, a.y, single ? (A.isAlly(sk) ? 'heal' : 'target') : 'faint'); });
           HUD.text(head + '<br>' + HUD.skillHint(sk) + '<br>' +
             (!aims.length ? 'Nada a tiro desde aquí.' : single ? 'Toca un objetivo.' : 'Toca dónde apuntar.'));
-          btn = [{ label: 'Cancelar', fn: back }];
+          btn = [{ label: 'Cancelar', sys: 1, fn: back }];
         } else if (mode === 'preview') {
           var fxs = A.preview(cur, sk, aim, spend), extra = '';
           if (aim) A.area(cur, sk, aim).forEach(function (t) { hl.add(t.x, t.y, A.isAlly(sk) ? 'heal' : 'area'); });
@@ -70,21 +70,21 @@ window.TT = window.TT || {};
           if (sk.kind === 'taunt') extra = 'Provoca a ' + A.tauntTargets(cur, sk).length + ' enemigo(s) · radio ' + sk.radius + ' · ' + sk.turns + ' turnos';
           spend = Math.min(spend, cur.boost);
           HUD.text(HUD.preview(cur, sk, fxs, spend, extra));
-          btn = [{ label: 'Confirmar', off: !fxs.length && sk.kind !== 'taunt', fn: confirm }];
+          btn = [{ label: 'Confirmar', main: 1, off: !fxs.length && sk.kind !== 'taunt', fn: confirm }];
           if (potenciable(sk)) {
             btn.push({ label: 'Potenciar +', off: spend >= cur.boost, fn: function () { spend++; refresh(); } });
             btn.push({ label: 'Potenciar −', off: spend <= 0, fn: function () { spend--; refresh(); } });
           }
-          btn.push({ label: 'Cancelar', fn: back });
+          btn.push({ label: 'Cancelar', sys: 1, fn: back });
         } else if (mode === 'retreat') {
           reach = U.reach(cur, sk.retreat);
           reach.forEach(function (r) { if (r.c > 0) hl.add(r.x, r.y, 'move'); });
           HUD.text(head + '<br><b>Retirada</b>: hasta ' + sk.retreat + ' casillas. Toca una azul.');
-          btn = [{ label: 'Quedarse', fn: function () { mode = 'face'; refresh(); } }];
+          btn = [{ label: 'Quedarse', sys: 1, fn: function () { mode = 'face'; refresh(); } }];
         } else if (mode === 'face') {
           TT.DIR.forEach(function (d) { hl.add(cur.x + d[0], cur.y + d[1], 'face'); });
           HUD.text(head + '<br><span class="dim">Toca una casilla vecina para girar (mira al ' + TT.DIR_NAMES[cur.face] + ').</span>');
-          btn = [{ label: 'Terminar turno', fn: function () { if (view.busy()) return; S.play('ui_confirm'); T.endTurn(); changed(); } }];
+          btn = [{ label: 'Terminar turno', sys: 1, fn: function () { if (view.busy()) return; HUD.log = []; S.play('ui_confirm'); T.endTurn(); changed(); } }];
         }
         HUD.buttons(btn);
       }
@@ -165,7 +165,8 @@ window.TT = window.TT || {};
             var res = A.resolve(cur, s, a, plan.spend);
             if (a && (a.x !== cur.x || a.y !== cur.y)) { cur.face = TT.faceOf(a.x - cur.x, a.y - cur.y); view.face(cur); }
             var dl = TT.Anim.delay(s.id);
-            view.attack(cur, s.id); later(dl, function () { play(res); }); hl.clear(); T.attackDone(); badges.refresh(); TT.QueueUI.refresh();
+            HUD.log.push(HUD.sum(cur, s, res)); later(dl, function () { play(res); HUD.text(HUD.turnLine() + '<br>' + HUD.log[HUD.log.length - 1]); });
+            view.attack(cur, s.id); hl.clear(); T.attackDone(); badges.refresh(); TT.QueueUI.refresh();
             if (T.phase === 'over') later(1.1 + dl, function () { mode = 'over'; refresh(); });
             else later(1.3 + dl, finish);
           });

@@ -13,16 +13,29 @@ window.TT = window.TT || {};
 
   H.text = function (html) { $('info').innerHTML = html; };
 
-  // buttons: [{ label, fn, off }]
+  // buttons: [{ label, sub, fn, off, main, sys }]. Acciones en cuadrícula de columnas iguales; "sys" (atrás, deshacer, esperar, terminar) en fila aparte y discretos.
   H.buttons = function (list) {
-    var box = $('actions'); box.innerHTML = '';
+    var box = $('actions'), g = document.createElement('div'), y = document.createElement('div');
+    box.innerHTML = ''; g.className = 'grid'; y.className = 'sys';
     list.forEach(function (b) {
       var el = document.createElement('button');
-      el.textContent = b.label; el.disabled = !!b.off;
+      el.innerHTML = b.label + (b.sub ? '<small>' + b.sub + '</small>' : ''); el.disabled = !!b.off;
+      if (b.main) el.className = 'main';
       el.addEventListener('click', b.fn);
-      box.appendChild(el);
+      (b.sys ? y : g).appendChild(el);
     });
+    if (g.children.length % 2 && !g.querySelector('.main')) g.lastChild.className = 'wide';   // un botón suelto ocupa todo el ancho
+    if (g.children.length) box.appendChild(g);
+    if (y.children.length) box.appendChild(y);
   };
+
+  // Resumen de la acción de un enemigo: "Ballestero · Disparo → Arquero −24".
+  H.log = [];
+  H.sum = function (u, sk, res) {
+    var t = res.map(function (e) { return e.u.name + (e.kind === 'dmg' ? ' −' + e.r.dmg + (e.r.weak ? ' (débil)' : '') + (e.r.kill ? ' ✝' : '') : e.kind === 'heal' ? ' +' + e.amt : ''); });
+    return '<b>' + u.name + '</b> · ' + sk.name + (t.length ? ' → ' + t.join(', ') : ' (sin objetivo)');
+  };
+  H.recap = function () { return H.log.length ? '<div class="recap">' + H.log.join('<br>') + '</div>' : ''; };
 
   H.turnLine = function () {
     var T = TT.Turns, u = T.cur;
