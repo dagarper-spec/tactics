@@ -108,7 +108,7 @@ window.TT = window.TT || {};
   // Retrato para la cola de turnos: cabeza y torso, 28x34.
   U.portrait = function (type, src) {
     var c = PX.canvas(28, 34), g = c.getContext('2d'), z = TT.Sheets.has(type) ? TT.SheetData[type] : null;
-    if (z) g.drawImage(src, z.cell / 2 - 14, z.feet - 55, 28, 34, 0, 0, 28, 34); else g.drawImage(src, (src.width - 28) / 2, 0, 28, 34, 0, 0, 28, 34);
+    if (z) { var q = z.por || [28, 34, 55]; g.drawImage(src, z.cell / 2 - q[0] / 2, z.feet - q[2], q[0], q[1], 0, 0, 28, 34); } else g.drawImage(src, (src.width - 28) / 2, 0, 28, 34, 0, 0, 28, 34);
     return c;
   };
 
@@ -132,7 +132,7 @@ window.TT = window.TT || {};
     return U.cache[k];
   };
   U.size = function (type) {
-    if (TT.Sheets.has(type)) { var d = TT.SheetData[type]; return { w: d.cell, h: d.cell, s: 1 / 42, m: d.cell - d.feet - 1 }; }
+    if (TT.Sheets.has(type)) { var d = TT.SheetData[type]; return { w: d.cell, h: d.cell, s: d.sc || 1 / 42, m: d.cell - d.feet - 1 }; }
     var Sp = Specs[type]; return { w: Sp.w || W, h: Sp.h || H, s: Sp.sc || 1 / 40 }; };
   U.tex = function (type, back, pose, dir) {
     var k = type + (back ? 'B' : 'F') + (pose || 'idle0');

@@ -3,13 +3,13 @@
 window.TT = window.TT || {};
 (function () {
   function sm(a, b, p) { return Math.max(0, Math.min(1, (p - a) / (b - a))); }
-  var R = { pose: 'idle0', fwd: 0, up: 0, sx: 1, sy: 1, glow: 0 };
+  var R = { seq: null, p: 0, pose: 'idle0', fwd: 0, up: 0, sx: 1, sy: 1, glow: 0 };
   // Cada tipo: dur = duración (s), hit = momento del impacto (0-1), f(p) rellena R.
   var K = {
-    swing:  { dur: 0.6, hit: 0.5, f: function (p) { R.pose = p < 0.35 ? 'atk0' : 'atk1'; R.fwd = p < 0.35 ? -0.05 * p / 0.35 : p < 0.8 ? -0.05 + 0.33 * sm(0.35, 0.55, p) : 0.28 * (1 - sm(0.8, 1, p)); } },
-    thrust: { dur: 0.5, hit: 0.45, f: function (p) { R.pose = p < 0.3 ? 'atk0' : 'atk1'; R.fwd = p < 0.3 ? -0.1 * p / 0.3 : p < 0.7 ? -0.1 + 0.5 * sm(0.3, 0.45, p) : 0.4 * (1 - sm(0.7, 1, p)); } },
-    bash:   { dur: 0.55, hit: 0.5, f: function (p) { R.pose = 'atk1'; R.fwd = 0.3 * Math.sin(Math.PI * sm(0.2, 0.75, p)); R.up = 0.1 * Math.sin(Math.PI * sm(0.3, 0.7, p)); R.sy = 1 - 0.06 * Math.sin(Math.PI * sm(0, 0.3, p)); } },
-    spin:   { dur: 0.75, hit: 0.5, f: function (p) { R.pose = 'atk1'; R.sx = Math.cos(Math.PI * 4 * sm(0.15, 0.85, p)); R.up = 0.12 * Math.sin(Math.PI * sm(0.15, 0.85, p)); } },
+    swing:  { seq: 'sword', dur: 0.6, hit: 0.5, f: function (p) { R.pose = p < 0.35 ? 'atk0' : 'atk1'; R.fwd = p < 0.35 ? -0.05 * p / 0.35 : p < 0.8 ? -0.05 + 0.33 * sm(0.35, 0.55, p) : 0.28 * (1 - sm(0.8, 1, p)); } },
+    thrust: { seq: 'sword', dur: 0.5, hit: 0.45, f: function (p) { R.pose = p < 0.3 ? 'atk0' : 'atk1'; R.fwd = p < 0.3 ? -0.1 * p / 0.3 : p < 0.7 ? -0.1 + 0.5 * sm(0.3, 0.45, p) : 0.4 * (1 - sm(0.7, 1, p)); } },
+    bash:   { seq: 'shield', dur: 0.55, hit: 0.5, f: function (p) { R.pose = 'atk1'; R.fwd = 0.3 * Math.sin(Math.PI * sm(0.2, 0.75, p)); R.up = 0.1 * Math.sin(Math.PI * sm(0.3, 0.7, p)); R.sy = 1 - 0.06 * Math.sin(Math.PI * sm(0, 0.3, p)); } },
+    spin:   { seq: 'whirl', dur: 0.75, hit: 0.5, f: function (p) { R.pose = 'atk1'; R.sx = Math.cos(Math.PI * 4 * sm(0.15, 0.85, p)); R.up = 0.12 * Math.sin(Math.PI * sm(0.15, 0.85, p)); } },
     shoot:  { dur: 0.5, hit: 0.4, f: function (p) { R.pose = 'atk0'; R.fwd = p < 0.4 ? 0 : -0.07 * Math.sin(Math.PI * sm(0.4, 0.8, p)); } },
     aim:    { dur: 0.95, hit: 0.7, f: function (p) { R.pose = 'atk0'; R.sy = 1 - 0.05 * sm(0, 0.65, p); R.fwd = p < 0.7 ? 0 : -0.09 * Math.sin(Math.PI * sm(0.7, 1, p)); R.glow = p < 0.7 ? 1 : 0; } },
     volley: { dur: 0.8, hit: 0.5, f: function (p) { R.pose = 'atk0'; R.up = 0.28 * Math.sin(Math.PI * sm(0.1, 0.9, p)); } },
@@ -27,7 +27,7 @@ window.TT = window.TT || {};
     dur: function (kind) { return K[kind].dur; },
     delay: function (id) { var k = K[OF[id] || 'swing']; return k.dur * k.hit; },     // cuándo se ven los números de daño
     sample: function (kind, p) {
-      R.pose = 'idle0'; R.fwd = 0; R.up = 0; R.sx = 1; R.sy = 1; R.glow = 0;
+      R.seq = K[kind].seq || null; R.p = Math.max(0, Math.min(1, p)); R.pose = 'idle0'; R.fwd = 0; R.up = 0; R.sx = 1; R.sy = 1; R.glow = 0;
       K[kind].f(Math.max(0, Math.min(1, p)));
       return R;
     },
