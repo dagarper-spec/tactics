@@ -105,6 +105,14 @@ window.TT = window.TT || {};
     return 'idle0' + (back ? 'B' : 'F');
   }
   U.has = function (type, pose) { return TT.Sheets.has(type) ? !!(TT.SheetData[type].frames[pose] || TT.SheetData[type].frames[pose + 'F']) : false; };
+  // Secuencia de animación disponible para pedir 'want' (con alternativas) y su nº de fotogramas.
+  var ALT = { shoot: ['cast', 'sword'], cast: ['shoot', 'sword'], sword: ['shoot', 'cast'], whirl: ['sword'], shield: ['sword'] };
+  U.seq = function (type, want) {
+    var l = [want].concat(ALT[want] || []);
+    for (var i = 0; i < l.length; i++) if (U.has(type, l[i] + '0')) return l[i];
+    return null;
+  };
+  U.count = function (type, q) { var n = TT.SheetData[type].n; return (n && n[q]) || 9; };
   // Retrato para la cola de turnos: cabeza y torso, 28x34.
   U.portrait = function (type, src) {
     var c = PX.canvas(28, 34), g = c.getContext('2d'), z = TT.Sheets.has(type) ? TT.SheetData[type] : null;

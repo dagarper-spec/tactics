@@ -45,7 +45,7 @@ window.TT = window.TT || {};
         if (mode === 'move') {
           reach = cur.moved ? [] : U.reach(cur);
           reach.forEach(function (r) { if (r.c > 0) hl.add(r.x, r.y, 'move'); });
-          HUD.text(head + '<br>' + HUD.card(insp || cur) + (cur.moved ? '' : '<br><span class="dim">Toca una casilla azul para moverte.</span>') + HUD.recap());
+          HUD.text(head + '<br>' + HUD.card(insp || cur) + (cur.moved ? '' : '<br><span class="dim">Toca una casilla azul para moverte.</span>'));
           btn.push({ label: 'Atacar', sub: TT.TypeNames[kit[0].type] || '', fn: function () { choose(kit[0]); } });
           if (kit.length > 1) btn.push({ label: 'Habilidades', sub: (kit.length - 1) + ' disponibles', fn: function () { mode = 'menu'; refresh(); } });
           btn.push({ label: 'Esperar', sys: 1, fn: function () { T.wait(); mode = 'face'; refresh(); } });
@@ -84,7 +84,7 @@ window.TT = window.TT || {};
         } else if (mode === 'face') {
           TT.DIR.forEach(function (d) { hl.add(cur.x + d[0], cur.y + d[1], 'face'); });
           HUD.text(head + '<br><span class="dim">Toca una casilla vecina para girar (mira al ' + TT.DIR_NAMES[cur.face] + ').</span>');
-          btn = [{ label: 'Terminar turno', sys: 1, fn: function () { if (view.busy()) return; HUD.log = []; S.play('ui_confirm'); T.endTurn(); changed(); } }];
+          btn = [{ label: 'Terminar turno', sys: 1, fn: function () { if (view.busy()) return; S.play('ui_confirm'); T.endTurn(); changed(); } }];
         }
         HUD.buttons(btn);
       }
@@ -165,8 +165,7 @@ window.TT = window.TT || {};
             var res = A.resolve(cur, s, a, plan.spend);
             if (a && (a.x !== cur.x || a.y !== cur.y)) { cur.face = TT.faceOf(a.x - cur.x, a.y - cur.y); view.face(cur); }
             var dl = TT.Anim.delay(s.id);
-            HUD.log.push(HUD.sum(cur, s, res)); later(dl, function () { play(res); HUD.text(HUD.turnLine() + '<br>' + HUD.log[HUD.log.length - 1]); });
-            view.attack(cur, s.id); hl.clear(); T.attackDone(); badges.refresh(); TT.QueueUI.refresh();
+            view.attack(cur, s.id); later(dl, function () { play(res); }); hl.clear(); T.attackDone(); badges.refresh(); TT.QueueUI.refresh();
             if (T.phase === 'over') later(1.1 + dl, function () { mode = 'over'; refresh(); });
             else later(1.3 + dl, finish);
           });

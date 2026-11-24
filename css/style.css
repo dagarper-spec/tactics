@@ -44,11 +44,9 @@ button:disabled { opacity: 0.4; }
 #actions .grid button { min-height: 46px; font-size: 15px; line-height: 1.15; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 4px 8px; }
 #actions .grid button small { font-size: 11px; color: var(--dim); margin-top: 1px; }
 #actions .grid .main { grid-column: 1 / -1; background: var(--gold); color: var(--bg); font-weight: bold; }
-#actions .grid .wide { grid-column: 1 / -1; }
 #actions .sys { display: flex; gap: 6px; margin-top: 6px; justify-content: flex-end; }
 #actions .sys button { min-height: 32px; min-width: 0; font-size: 12px; padding: 0 14px; background: transparent; border-color: var(--dim); color: var(--dim); }
 #actions .sys button:active { background: var(--dim); color: var(--bg); }
-.recap { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--dim); font-size: 12px; color: var(--dim); }
 #top {
   position: fixed; top: max(10px, env(safe-area-inset-top)); left: 12px; right: 12px;
   display: flex; gap: 8px; align-items: center; justify-content: space-between; pointer-events: none;

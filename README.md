@@ -8,5 +8,5 @@ Controles: tocar/clic = seleccionar unidad o mover a casilla azul · arrastrar =
 
 ## Sprites desde hojas PNG
 `tools/make_sheet.py hoja.png nombre` convierte una hoja con fondo verde plano en `img/<nombre>.png` (atlas) y
-- Guerrero: hoja de PixelLab (88 px, 5 direcciones + espejo) convertida con `python3 tools/make_pl.py hoja.png hoja.json warrior`; tiene marcha y 3 ataques (espada, remolino, escudo). Herido, muerte e idle usan las animaciones genéricas del motor.
+- Sprites de PixelLab: `python3 tools/make_pl.py hoja.png hoja.json <clase>` (warrior, archer, mage, cleric, soldier, crossbow, sorcerer, captain). Reconoce las animaciones por el nombre (Walking/andar, idle, herido, muerte, disparo/arco, lanzar/hechizo, golpe/espada, remolino, escudo), usa 5 direcciones (el oeste, por espejo), calcula escala y pies solos y añade el `<script>` a index.html. Lo que falte lo cubre el motor (idle, herido y muerte genéricos; disparo y lanzar se sustituyen entre sí).
 `js/sheet_<nombre>.js` (datos). Si una clase no tiene hoja, se dibuja por código (`unitart.js`, `specs_*.js`).

@@ -92,12 +92,13 @@ window.TT = window.TT || {};
             var f = TT.DIR[v.face];
             var toCam = f[0] * sy + f[1] * cy, side = f[0] * cy - f[1] * sy;
             if (v.hurt > 0) v.hurt -= dt;
-            var pose = v.dying > 0 && v.dmax > 1 ? 'die' + Math.min(8, Math.floor((1 - v.dying / v.dmax) / 0.75 * 9)) : v.hurt > 0 && !v.path && v.atk <= 0 && UA.has(v.u.type, 'hurt') ? 'hurt' : an ? (an.seq && UA.has(v.u.type, an.seq + '0') ? an.seq + Math.min(8, Math.floor(an.p * 9)) : an.pose) : v.path ? 'walk' + ((v.idx % 2) * 2 + (v.t < 0.5 ? 0 : 1)) : ((time * 1.8 + v.i * 0.7) % 2 < 1 ? 'idle0' : 'idle1');
+            var sqn = an && an.seq && TT.Sheets.has(v.u.type) ? UA.seq(v.u.type, an.seq) : null;
+            var pose = v.dying > 0 && v.dmax > 1 ? 'die' + Math.min(8, Math.floor((1 - v.dying / v.dmax) / 0.75 * 9)) : v.hurt > 0 && !v.path && v.atk <= 0 && UA.has(v.u.type, 'hurt') ? 'hurt' : an ? (sqn ? sqn + Math.min(UA.count(v.u.type, sqn) - 1, Math.floor(an.p * UA.count(v.u.type, sqn))) : an.pose) : v.path ? 'walk' + ((v.idx % 2) * 2 + (v.t < 0.5 ? 0 : 1)) : ((time * 1.8 + v.i * 0.7) % 2 < 1 ? 'idle0' : 'idle1');
             var ang = Math.atan2(Math.abs(side), toCam);          // 0 de frente · 90° de perfil · 180° de espaldas
             var dir = ang < 0.39 ? 'F' : ang < 1.18 ? 'FS' : ang < 1.96 ? 'S' : ang < 2.75 ? 'BS' : 'B';
             var m = UA.tex(v.u.type, toCam < 0, pose, dir);
             if (v.mat.map !== m) v.mat.map = m;
-            var sq = an && an.seq && UA.has(v.u.type, an.seq + '0'), br = !TT.Sheets.has(v.u.type) || UA.has(v.u.type, 'idle1') ? 1 : 1 + 0.015 * Math.sin(time * 3 + v.i);   // con fotogramas propios no se gira ni se aplasta; sin idle1 respira
+            var sq = !!sqn, br = !TT.Sheets.has(v.u.type) || UA.has(v.u.type, 'idle1') ? 1 : 1 + 0.015 * Math.sin(time * 3 + v.i);   // con fotogramas propios no se gira ni se aplasta; sin idle1 respira
             v.sprite.scale.set((side < 0 ? -v.big : v.big) * (an && !sq ? an.sx : 1), v.big * (an && !sq ? an.sy : br), 1);
             v.sprite.rotation.y = yaw;
             v.sprite.position.y = hop + (an ? an.up : 0);

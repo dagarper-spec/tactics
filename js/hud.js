@@ -24,18 +24,9 @@ window.TT = window.TT || {};
       el.addEventListener('click', b.fn);
       (b.sys ? y : g).appendChild(el);
     });
-    if (g.children.length % 2 && !g.querySelector('.main')) g.lastChild.className = 'wide';   // un botón suelto ocupa todo el ancho
     if (g.children.length) box.appendChild(g);
     if (y.children.length) box.appendChild(y);
   };
-
-  // Resumen de la acción de un enemigo: "Ballestero · Disparo → Arquero −24".
-  H.log = [];
-  H.sum = function (u, sk, res) {
-    var t = res.map(function (e) { return e.u.name + (e.kind === 'dmg' ? ' −' + e.r.dmg + (e.r.weak ? ' (débil)' : '') + (e.r.kill ? ' ✝' : '') : e.kind === 'heal' ? ' +' + e.amt : ''); });
-    return '<b>' + u.name + '</b> · ' + sk.name + (t.length ? ' → ' + t.join(', ') : ' (sin objetivo)');
-  };
-  H.recap = function () { return H.log.length ? '<div class="recap">' + H.log.join('<br>') + '</div>' : ''; };
 
   H.turnLine = function () {
     var T = TT.Turns, u = T.cur;
