@@ -2,7 +2,7 @@
 window.TT = window.TT || {};
 (function () {
   var P = TT.PAL, M = TT.Map, hex = TT.hex, UA = TT.UnitArt, S = 1 / 40;
-  var STEP = 0.2;                                   // segundos por casilla
+  var STEP = 0.28;                                  // segundos por casilla
 
   function wpos(x, y) { return new THREE.Vector3(x, M.topY(x, y), y); }
 
@@ -67,7 +67,7 @@ window.TT = window.TT || {};
               v.t += dt / dur;
               var t = Math.min(1, v.t);
               v.pos.lerpVectors(a, b, t);
-              hop = Math.sin(Math.PI * t) * (0.16 + dy * 0.5);
+              hop = 0.02 * Math.abs(Math.sin(2 * Math.PI * t));     // balanceo mínimo al pisar (sin saltitos)
               v.face = TT.faceOf(b.x - a.x, b.z - a.z);
               if (v.t >= 1) {
                 v.idx++; v.t = 0; TT.Audio.play('step', 0.7);
@@ -93,7 +93,9 @@ window.TT = window.TT || {};
             var toCam = f[0] * sy + f[1] * cy, side = f[0] * cy - f[1] * sy;
             if (v.hurt > 0) v.hurt -= dt;
             var pose = v.dying > 0 && v.dmax > 1 ? 'die' + Math.min(8, Math.floor((1 - v.dying / v.dmax) / 0.75 * 9)) : v.hurt > 0 && !v.path && v.atk <= 0 && UA.has(v.u.type, 'hurt') ? 'hurt' : an ? an.pose : v.path ? 'walk' + ((v.idx % 2) * 2 + (v.t < 0.5 ? 0 : 1)) : ((time * 1.8 + v.i * 0.7) % 2 < 1 ? 'idle0' : 'idle1');
-            var m = UA.tex(v.u.type, toCam < 0, pose);
+            var ang = Math.atan2(Math.abs(side), toCam);          // 0 de frente · 90° de perfil · 180° de espaldas
+            var dir = ang < 0.39 ? 'F' : ang < 1.18 ? 'FS' : ang < 1.96 ? 'S' : ang < 2.75 ? 'BS' : 'B';
+            var m = UA.tex(v.u.type, toCam < 0, pose, dir);
             if (v.mat.map !== m) v.mat.map = m;
             v.sprite.scale.set((side < 0 ? -v.big : v.big) * (an ? an.sx : 1), v.big * (an ? an.sy : 1), 1);
             v.sprite.rotation.y = yaw;
@@ -103,7 +105,7 @@ window.TT = window.TT || {};
             v.ring.material.color.setHex(sel ? hex(P.side.select) : v.baseCol);
             var pulse = sel ? 1 + 0.08 * Math.sin(time * 6) : 1;
             v.ring.scale.set(pulse, pulse, 1);
-            v.shadow.scale.set(1 - hop, 1 - hop, 1);
+            v.shadow.scale.set(1 - hop * 2, 1 - hop * 2, 1);
             if (v.flash > 0) v.flash -= dt;                      // destello rojo al recibir daño
             v.mat.color.setHex(v.flash > 0 ? 0xff7070 : (v.u.broken ? 0x8a98d0 : 0xf2eefa));   // azulado si está roto
             if (v.dying > 0) {                                   // desvanecer al morir

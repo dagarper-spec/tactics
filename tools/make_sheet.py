@@ -13,6 +13,8 @@ FRAMES = {
     'walk0F': (1, 0), 'walk1F': (1, 1), 'walk2F': (1, 2), 'walk3F': (1, 1),
     'walk0B': (1, 7), 'walk1B': (1, 8), 'walk2B': (1, 9), 'walk3B': (1, 8),
     'atk0F': (3, 0), 'atk1F': (3, 2), 'hurtF': (4, 0),
+    'idle0S': (0, 4), 'idle1S': (0, 5), 'walk0S': (1, 4), 'walk1S': (1, 5), 'walk2S': (1, 6), 'walk3S': (1, 5),
+    'idle0FS': (0, 10), 'idle1FS': (0, 11), 'walk0FS': (1, 10), 'walk1FS': (1, 11), 'walk2FS': (1, 12), 'walk3FS': (1, 13),
 }
 for i in range(9): FRAMES['die%d' % i] = (6, 4 + i)
 

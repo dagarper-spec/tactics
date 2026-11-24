@@ -4,9 +4,9 @@ window.TT = window.TT || {};
   var P = TT.PAL, hex = TT.hex;
 
   var Q = TT.Quality = {
-    low:    { name: 'Bajo',  pr: 1,   shadows: false, shadowSize: 512,  bloom: false, fireflies: 14, mist: 0 },
-    medium: { name: 'Medio', pr: 1.5, shadows: true,  shadowSize: 1024, bloom: true,  fireflies: 24, mist: 1 },
-    high:   { name: 'Alto',  pr: 2,   shadows: true,  shadowSize: 2048, bloom: true,  fireflies: 40, mist: 1 }
+    low:    { name: 'Bajo',  pr: 1,   shadows: false, shadowSize: 512,  bloom: false, tilt: false, fireflies: 14, mist: 0 },
+    medium: { name: 'Medio', pr: 1.5, shadows: true,  shadowSize: 1024, bloom: true,  tilt: true,  fireflies: 24, mist: 1 },
+    high:   { name: 'Alto',  pr: 2,   shadows: true,  shadowSize: 2048, bloom: true,  tilt: true,  fireflies: 40, mist: 1 }
   };
   Q.order = ['low', 'medium', 'high'];
   Q.pick = function () {
@@ -17,22 +17,6 @@ window.TT = window.TT || {};
     return mobile ? 'medium' : 'high';
   };
   Q.save = function (k) { try { localStorage.setItem('tt_quality', k); } catch (e) {} };
-
-  var VignetteShader = {
-    uniforms: { tDiffuse: { value: null }, amount: { value: 0.35 } },
-    vertexShader: 'varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
-    fragmentShader: [
-      'uniform sampler2D tDiffuse; uniform float amount; varying vec2 vUv;',
-      'void main(){',
-      '  vec4 c = texture2D(tDiffuse, vUv);',
-      '  float l = dot(c.rgb, vec3(0.299,0.587,0.114));',
-      '  c.rgb = mix(vec3(l), c.rgb, 1.08);',                       // algo más de color
-      '  float d = distance(vUv, vec2(0.5));',
-      '  c.rgb *= 1.0 - smoothstep(0.35, 0.85, d) * amount;',       // viñeta
-      '  gl_FragColor = c;',
-      '}'
-    ].join('\n')
-  };
 
   TT.Render = {
     init: function (canvas, qKey) {
@@ -58,25 +42,27 @@ window.TT = window.TT || {};
       }
       scene.add(sun); scene.add(sun.target);
 
-      // Postproceso: render -> bloom -> viñeta -> FXAA.
+      // Postproceso: render -> tilt-shift -> bloom -> color y viñeta -> FXAA.
       var composer = new THREE.EffectComposer(renderer);
       composer.setPixelRatio(pr); composer.setSize(w, h);
       composer.addPass(new THREE.RenderPass(scene, TT.Cam.camera));
-      var bloom = null;
+      var tilt = null, bloom = null;
+      if (q.tilt) { tilt = new THREE.ShaderPass(TT.TiltShift); composer.addPass(tilt); }
       if (q.bloom) {
         bloom = new THREE.UnrealBloomPass(new THREE.Vector2(w, h), 0.5, 0.4, 0.8);
         composer.addPass(bloom);
       }
-      composer.addPass(new THREE.ShaderPass(VignetteShader));
+      composer.addPass(new THREE.ShaderPass(TT.Grade));
       var fxaa = new THREE.ShaderPass(THREE.FXAAShader);
       composer.addPass(fxaa);
 
-      var R = { renderer: renderer, scene: scene, composer: composer, sun: sun, bloom: bloom, fxaa: fxaa, pr: pr, q: q };
+      var R = { renderer: renderer, scene: scene, composer: composer, sun: sun, bloom: bloom, tilt: tilt, fxaa: fxaa, pr: pr, q: q };
       R.resize = function () {
         var W = window.innerWidth, H = window.innerHeight;
         renderer.setSize(W, H, false);
         composer.setPixelRatio(pr); composer.setSize(W, H);
         fxaa.material.uniforms.resolution.value.set(1 / (W * pr), 1 / (H * pr));
+        if (tilt) tilt.uniforms.texel.value.set(1 / (W * pr), 1 / (H * pr));
         TT.Cam.resize(W, H);
       };
       R.render = function () { composer.render(); };

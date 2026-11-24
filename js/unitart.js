@@ -7,8 +7,8 @@ window.TT = window.TT || {};
   var Specs = TT.Specs = TT.Specs || {};
   var POSES = {
     idle0: { bob: 0, l: 0, r: 0, al: 0, ar: 0 }, idle1: { bob: 1, l: 0, r: 0, al: 0, ar: 0 },
-    walk0: { bob: 0, l: 2, r: 0, al: 1, ar: -1 }, walk1: { bob: 1, l: 0, r: 0, al: 0, ar: 0 },
-    walk2: { bob: 0, l: 0, r: 2, al: -1, ar: 1 }, walk3: { bob: 1, l: 0, r: 0, al: 0, ar: 0 },
+    walk0: { bob: 0, l: 3, r: 0, al: 2, ar: -2 }, walk1: { bob: 1, l: 1, r: 1, al: 0, ar: 0 },
+    walk2: { bob: 0, l: 0, r: 3, al: -2, ar: 2 }, walk3: { bob: 1, l: 1, r: 1, al: 0, ar: 0 },
     atk0: { bob: 0, l: 0, r: 0, al: 0, ar: -6, atk: 1 }, atk1: { bob: 1, l: 0, r: 0, al: 0, ar: -3, atk: 1 },
     cast: { bob: 0, l: 0, r: 0, al: 0, ar: -7, atk: 1, both: 1 }
   };
@@ -94,13 +94,15 @@ window.TT = window.TT || {};
     A.stamp(g, hx - gx, hy - o.grip[1] + dy, rows, null, m);
   }
 
-  // Hoja de sprites: elige el fotograma de la pose (con alternativas si falta) y lo copia a un canvas.
-  function frameFor(d, back, pose) {
-    var s = back ? 'B' : 'F', f = d.frames;
-    if (pose === 'cast') pose = 'atk0';                  // las hojas sin animación de conjuro usan la de ataque
-    if (f[pose]) return pose;
-    if (f[pose + s]) return pose + s;
-    return f['idle0' + s] ? 'idle0' + s : 'idle0F';
+  // Hoja de sprites: elige el fotograma de la pose y la orientación (F, FS, S, BS, B), con alternativas si falta.
+  function frameFor(d, back, pose, dir) {
+    var f = d.frames, s = dir || (back ? 'B' : 'F');
+    var chain = s === 'FS' ? ['FS', 'F'] : s === 'BS' ? ['BS', 'B'] : s === 'S' ? ['S', back ? 'B' : 'F'] : [s];
+    var ps = [pose === 'cast' ? 'atk0' : pose];
+    if (pose.indexOf('walk') === 0 || pose === 'idle1') ps.push('idle0');
+    if (f[ps[0]]) return ps[0];
+    for (var i = 0; i < chain.length; i++) for (var k = 0; k < ps.length; k++) if (f[ps[k] + chain[i]]) return ps[k] + chain[i];
+    return 'idle0' + (back ? 'B' : 'F');
   }
   U.has = function (type, pose) { return TT.Sheets.has(type) ? !!(TT.SheetData[type].frames[pose] || TT.SheetData[type].frames[pose + 'F']) : false; };
   // Retrato para la cola de turnos: cabeza y torso, 28x34.
@@ -110,10 +112,10 @@ window.TT = window.TT || {};
     return c;
   };
 
-  U.canvas = function (type, back, pose) {
+  U.canvas = function (type, back, pose, dir) {
     pose = pose || 'idle0';
     if (TT.Sheets.has(type)) {
-      var d = TT.SheetData[type], fn = frameFor(d, back, pose), k2 = type + '|' + fn;
+      var d = TT.SheetData[type], fn = frameFor(d, back, pose, dir), k2 = type + '|' + fn;
       if (!U.cache[k2]) {
         var f = d.frames[fn], cv = PX.canvas(d.cell, d.cell);
         cv.getContext('2d').drawImage(TT.Sheets.img[type], f[0] * d.cell, f[1] * d.cell, d.cell, d.cell, 0, 0, d.cell, d.cell);
@@ -132,10 +134,10 @@ window.TT = window.TT || {};
   U.size = function (type) {
     if (TT.Sheets.has(type)) { var d = TT.SheetData[type]; return { w: d.cell, h: d.cell, s: 1 / 42, m: d.cell - d.feet - 1 }; }
     var Sp = Specs[type]; return { w: Sp.w || W, h: Sp.h || H, s: Sp.sc || 1 / 40 }; };
-  U.tex = function (type, back, pose) {
+  U.tex = function (type, back, pose, dir) {
     var k = type + (back ? 'B' : 'F') + (pose || 'idle0');
-    if (TT.Sheets.has(type)) k = type + '|' + frameFor(TT.SheetData[type], back, pose || 'idle0');
-    return U.texs[k] || (U.texs[k] = PX.tex(U.canvas(type, back, pose)));
+    if (TT.Sheets.has(type)) k = type + '|' + frameFor(TT.SheetData[type], back, pose || 'idle0', dir);
+    return U.texs[k] || (U.texs[k] = PX.tex(U.canvas(type, back, pose, dir)));
   };
 })();
 // FIN DE ARCHIVO
