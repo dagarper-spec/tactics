@@ -9,7 +9,7 @@ Las músicas de batalla deben ser un **bucle sin corte** (el final enlaza con el
 ## Música
 | Archivo | Cuándo suena |
 |---|---|
-| `music_battle` | Durante toda la batalla (bucle) |
+| `music_battle`, `music_battle2` | Batalla: alternan una tras otra (ya incluidas: Tactical Charge y Steel and Strings) |
 | `music_victory` | Al ganar (una vez, 5-15 s) |
 | `music_defeat` | Al perder (una vez, 5-15 s) |
 

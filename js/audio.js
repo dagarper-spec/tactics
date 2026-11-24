@@ -6,7 +6,7 @@ window.TT = window.TT || {};
   var last = {};
 
   // Lista completa de sonidos esperados (ver audio/README.md).
-  A.NAMES = ['music_battle', 'music_victory', 'music_defeat',
+  A.NAMES = ['music_battle', 'music_battle2', 'music_victory', 'music_defeat',
     'ui_select', 'ui_confirm', 'ui_cancel', 'ui_turn', 'step',
     'hit_slash', 'hit_blunt', 'hit_pierce', 'hit_fire', 'hit_ice', 'hit_light', 'hit_back', 'death',
     'shield_hit', 'break', 'recover', 'boost', 'taunt', 'heal'];
@@ -71,13 +71,20 @@ window.TT = window.TT || {};
     var b = A.bufs[name];
     if (!b) { load(name); return; }
     var s = A.ctx.createBufferSource(), g = A.ctx.createGain();
-    s.buffer = b; s.loop = A.wantLoop;
+    s.buffer = b; s.loop = A.wantLoop && !A.list;
+    if (A.list) s.onended = function () { if (A.cur && A.cur.s === s) A.playList(); };   // al acabar, la siguiente pista
     g.gain.value = 0; g.gain.linearRampToValueAtTime(1, A.ctx.currentTime + 0.8);
     s.connect(g); g.connect(A.gM); s.start();
     A.cur = { s: s, g: g };
   };
+  // Lista de pistas de batalla: empieza por una al azar y van alternando sin cortes bruscos.
+  A.playList = function (names) {
+    if (names) { A.names = names; A.k = Math.floor(Math.random() * names.length) - 1; }
+    A.k = (A.k + 1) % A.names.length; A.list = true;
+    A.playMusic(A.names[A.k], true);
+  };
   A.stopMusic = function (keepWant) {
-    if (!keepWant) A.want = null;
+    if (!keepWant) { A.want = null; A.list = false; }
     if (!A.cur || !A.ctx) return;
     var c = A.cur, t = A.ctx.currentTime;
     c.g.gain.cancelScheduledValues(t); c.g.gain.setValueAtTime(c.g.gain.value, t);

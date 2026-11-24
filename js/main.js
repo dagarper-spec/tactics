@@ -36,7 +36,7 @@ window.TT = window.TT || {};
     function sndLook() { sb.style.opacity = A.enabled ? 1 : 0.4; sb.textContent = A.enabled ? '\u266A' : '\u2715'; }
     sndLook();
     sb.addEventListener('click', function () { A.unlock(); A.toggle(); sndLook(); if (A.enabled) A.play('ui_select'); });
-    function first() { A.unlock(); A.playMusic('music_battle', true); document.removeEventListener('pointerdown', first); }
+    function first() { A.unlock(); A.playList(['music_battle', 'music_battle2']); document.removeEventListener('pointerdown', first); }
     document.addEventListener('pointerdown', first);
     var qb = $('qual');
     qb.textContent = 'Cal. ' + R.q.name;

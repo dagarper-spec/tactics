@@ -37,7 +37,7 @@ window.TT = window.TT || {};
         if (mode === 'over') {
           hl.cursorShow(false); view.select(null);
           HUD.text('Fin de la batalla.'); HUD.buttons([]);
-          if (!S.ended) { S.ended = true; S.playMusic(T.winner === 'hero' ? 'music_victory' : 'music_defeat', false); }
+          if (!S.ended) { S.ended = true; S.list = false; S.playMusic(T.winner === 'hero' ? 'music_victory' : 'music_defeat', false); }
           HUD.end(T.winner, T.round, U.list.filter(function (u) { return u.side === 'hero' && u.hp > 0; }).length);
           return;
         }
