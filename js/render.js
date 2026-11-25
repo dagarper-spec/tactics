@@ -26,21 +26,27 @@ window.TT = window.TT || {};
       renderer.setPixelRatio(pr); renderer.setSize(w, h, false);
       if (q.shadows) { renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; }
 
-      var scene = new THREE.Scene();
-      scene.background = TT.PX.skyTex(P.light.skyTop, P.light.skyLow);
-      scene.fog = new THREE.Fog(hex(P.light.fog), 26, 70);
+      // Cada escena (batalla, pueblo...) tiene su propia THREE.Scene con cielo, niebla y luces.
+      function makeScene() {
+        var scene = new THREE.Scene();
+        scene.background = TT.PX.skyTex(P.light.skyTop, P.light.skyLow);
+        scene.fog = new THREE.Fog(hex(P.light.fog), 26, 70);
 
-      scene.add(new THREE.AmbientLight(hex(P.light.ambient), 1.1));
-      var sun = new THREE.DirectionalLight(hex(P.light.sun), 1.0);
-      sun.position.set(7.5, 8, 15.5);
-      sun.target.position.set(4.5, 0, 4.5);
-      if (q.shadows) {
-        sun.castShadow = true;
-        sun.shadow.mapSize.set(q.shadowSize, q.shadowSize);
-        var sc = sun.shadow.camera; sc.left = -10; sc.right = 10; sc.top = 10; sc.bottom = -10; sc.near = 1; sc.far = 45;
-        sun.shadow.bias = -0.0006;
+        scene.add(new THREE.AmbientLight(hex(P.light.ambient), 1.1));
+        var sun = new THREE.DirectionalLight(hex(P.light.sun), 1.0);
+        sun.position.set(7.5, 8, 15.5);
+        sun.target.position.set(4.5, 0, 4.5);
+        if (q.shadows) {
+          sun.castShadow = true;
+          sun.shadow.mapSize.set(q.shadowSize, q.shadowSize);
+          var sc = sun.shadow.camera; sc.left = -10; sc.right = 10; sc.top = 10; sc.bottom = -10; sc.near = 1; sc.far = 45;
+          sun.shadow.bias = -0.0006;
+        }
+        scene.add(sun); scene.add(sun.target);
+        scene.userData.sun = sun;
+        return scene;
       }
-      scene.add(sun); scene.add(sun.target);
+      var scene = makeScene(), sun = scene.userData.sun;
 
       // Postproceso: render -> tilt-shift -> bloom -> color y viñeta -> FXAA.
       var composer = new THREE.EffectComposer(renderer);
@@ -65,6 +71,8 @@ window.TT = window.TT || {};
         if (tilt) tilt.uniforms.texel.value.set(1 / (W * pr), 1 / (H * pr));
         TT.Cam.resize(W, H);
       };
+      R.makeScene = makeScene;
+      R.use = function (sc) { R.scene = sc; R.sun = sc.userData.sun; composer.passes[0].scene = sc; };
       R.render = function () { composer.render(); };
       R.resize();
       window.addEventListener('resize', R.resize);

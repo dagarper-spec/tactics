@@ -10,8 +10,18 @@
 </head>
 <body>
 <canvas id="game"></canvas>
+<div id="home">
+  <h1>Tactics</h1>
+  <p class="sub">El paso del río</p>
+  <div class="menu">
+    <button id="hCont" class="plank">Continuar</button>
+    <button id="hNew" class="plank">Nueva partida</button>
+  </div>
+  <p id="hSave" class="dim"></p>
+</div>
+<div id="fade"></div>
 <div id="top">
-  <div class="panel" id="title">El paso del río · Hito 6</div>
+  <div class="panel" id="title">El paso del río · Hito 7</div>
   <div class="btns">
     <button id="rotL" title="Girar cámara (Q)" aria-label="Girar a la izquierda">&#8630;</button>
     <button id="rotR" title="Girar cámara (E)" aria-label="Girar a la derecha">&#8631;</button>
@@ -78,6 +88,10 @@
 <script src="js/camera.js"></script>
 <script src="js/lookfx.js"></script>
 <script src="js/render.js"></script>
+<script src="js/save.js"></script>
+<script src="js/scenes.js"></script>
+<script src="js/scene_title.js"></script>
+<script src="js/scene_battle.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

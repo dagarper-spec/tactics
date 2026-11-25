@@ -1,11 +1,12 @@
-// Arranque y bucle principal (delta time). Hito 5: IA enemiga y cierre de batalla.
+// Arranque: render compartido, ajustes, bucle con delta time y gestor de escenas.
 window.TT = window.TT || {};
 (function () {
   function $(id) { return document.getElementById(id); }
 
   function start() {
     if (typeof THREE === 'undefined' || !THREE.EffectComposer || !THREE.UnrealBloomPass || !THREE.FXAAShader) {
-      $('info').textContent = 'No se pudo cargar three.js. Comprueba la conexión.';
+      $('hSave').textContent = 'No se pudo cargar three.js. Comprueba la conexión.';
+      document.body.className = 'scene-title';
       return;
     }
     TT.Sheets.load(boot);
@@ -13,21 +14,7 @@ window.TT = window.TT || {};
 
   function boot() {
     var qKey = TT.Quality.pick();
-    var R = TT.Render.init($('game'), qKey);
-    var terrain = TT.Terrain.build(R.scene, R.q);
-    TT.Fort.build(R.scene, R.q);
-    var scenery = TT.Scenery.build(R.scene, R.q);
-    var parts = TT.Particles.build(R.scene, R.q);
-
-    TT.Units.init();
-    var view = TT.UnitView.build(R.scene);
-    var fx = TT.FX.build(R.scene);
-    TT.Impact.build(R.scene);
-    TT.QueueUI.init($('queue'));
-    var badges = TT.Badges.build(R.scene, view);
-    var hl = TT.Highlight.build(R.scene);
-    var sel = TT.Selection.init(terrain, view, fx, TT.Cam, badges, hl);
-    TT.Cam.bind($('game'), sel.onTap);
+    var R = TT.R = TT.Render.init($('game'), qKey);
 
     $('rotL').addEventListener('click', function () { TT.Cam.rotate(-1); });
     $('rotR').addEventListener('click', function () { TT.Cam.rotate(1); });
@@ -37,8 +24,7 @@ window.TT = window.TT || {};
     function sndLook() { sb.style.opacity = A.enabled ? 1 : 0.4; sb.textContent = (A.enabled ? '\u266A ' : '\u2715 ') + 'Sonido'; }
     sndLook();
     sb.addEventListener('click', function () { A.unlock(); A.toggle(); sndLook(); if (A.enabled) A.play('ui_select'); });
-    function first() { A.unlock(); A.playList(['music_battle', 'music_battle2']); document.removeEventListener('pointerdown', first); }
-    document.addEventListener('pointerdown', first);
+    document.addEventListener('pointerdown', function first() { A.unlock(); document.removeEventListener('pointerdown', first); });
     var qb = $('qual');
     qb.textContent = 'Calidad: ' + R.q.name;
     qb.addEventListener('click', function () {
@@ -47,25 +33,21 @@ window.TT = window.TT || {};
     });
 
     // Bucle con delta time (limitado para no dar saltos tras una pausa).
-    var last = performance.now(), time = 0, fpsAcc = 0, fpsN = 0, fpsEl = $('fps');
+    var last = performance.now(), fpsAcc = 0, fpsN = 0, fpsEl = $('fps');
     function frameLoop(now) {
       requestAnimationFrame(frameLoop);
       var raw = Math.max(0, Math.min(0.1, (now - last) / 1000)); last = now;
-      var dt = raw * TT.Impact.scale(raw); time += dt;
-      TT.Impact.update(raw);
-      TT.Cam.update(dt);
-      terrain.update(dt);
-      scenery.update(dt, TT.Cam.yaw);
-      parts.update(dt, time);
-      view.update(dt, TT.Cam.yaw, time);
-      fx.update(dt);
-      badges.update();
-      sel.update(time, dt);
-      R.render();
-      fpsAcc += dt; fpsN++;
+      TT.Scenes.update(raw, now);
+      if (TT.Scenes.is3d()) R.render();
+      fpsAcc += raw; fpsN++;
       if (fpsAcc >= 0.5) { fpsEl.textContent = Math.round(fpsN / fpsAcc) + ' FPS'; fpsAcc = 0; fpsN = 0; }
     }
     requestAnimationFrame(frameLoop);
+
+    var retry = false;                                        // "Jugar de nuevo" salta el título
+    try { retry = sessionStorage.getItem('tt_retry') === '1'; sessionStorage.removeItem('tt_retry'); } catch (e) {}
+    TT.Save.load();
+    TT.Scenes.go(retry ? 'battle' : 'title', null, true);
   }
 
   window.addEventListener('load', start);

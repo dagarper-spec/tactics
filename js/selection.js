@@ -38,7 +38,7 @@ window.TT = window.TT || {};
           hl.cursorShow(false); view.select(null);
           HUD.text('Fin de la batalla.'); HUD.buttons([]);
           if (!S.ended) { S.ended = true; S.list = false; S.playMusic(T.winner === 'hero' ? 'music_victory' : 'music_defeat', false); }
-          HUD.end(T.winner, T.round, U.list.filter(function (u) { return u.side === 'hero' && u.hp > 0; }).length);
+          TT.Save.battleDone('river', T.winner, T.round); HUD.end(T.winner, T.round, U.list.filter(function (u) { return u.side === 'hero' && u.hp > 0; }).length);
           return;
         }
         view.select(cur); hl.cursorShow(true);

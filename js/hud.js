@@ -68,7 +68,7 @@ window.TT = window.TT || {};
       '<p>Rondas: <b>' + rounds + '</b> · Héroes en pie: <b>' + alive + '/4</b></p>' +
       '<button id="again">Jugar de nuevo</button>';
     el.hidden = false;
-    $('again').addEventListener('click', function () { location.reload(); });
+    $('again').addEventListener('click', function () { try { sessionStorage.setItem('tt_retry', '1'); } catch (e) {} location.reload(); });
   };
 
   H.tile = function (c) { return '<b>' + M.label(c.x, c.y) + '</b> · ' + TILE[c.type] + ' · altura ' + Math.max(0, c.h); };
