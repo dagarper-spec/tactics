@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#14121F">
 <title>Tactics — El paso del río</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/ui.css">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -14,10 +15,13 @@
   <div class="btns">
     <button id="rotL" title="Girar cámara (Q)" aria-label="Girar a la izquierda">&#8630;</button>
     <button id="rotR" title="Girar cámara (E)" aria-label="Girar a la derecha">&#8631;</button>
-    <button id="snd" aria-label="Sonido">&#9835;</button>
-    <button id="qual">Calidad</button>
+    <button id="cfgBtn" aria-label="Ajustes">&#9881;</button>
   </div>
   <div id="fps"></div>
+</div>
+<div class="panel" id="cfg" hidden>
+  <button id="snd" aria-label="Sonido">&#9835; Sonido</button>
+  <button id="qual">Calidad</button>
 </div>
 <div class="panel" id="queue"></div>
 <div class="panel" id="end" hidden></div>

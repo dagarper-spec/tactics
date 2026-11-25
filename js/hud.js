@@ -51,8 +51,8 @@ window.TT = window.TT || {};
     var o = '<div class="row"><b class="' + u.side + '">' + u.name + '</b> <span class="dim">' + SIDE[u.side] + ' · ' +
       M.label(u.x, u.y) + ' · alt ' + Math.max(0, c.h) + '</span></div>' +
       '<div class="hp"><i><b class="' + (pc < 35 ? 'low' : '') + '" style="width:' + pc + '%"></b></i>' + u.hp + '/' + u.maxHp + '</div>' +
-      '<div class="chips">AT ' + s.at + ' MG ' + s.mg + ' DF ' + s.df + ' RS ' + s.rs + ' VL ' + s.vl + ' MV ' + s.mv + '</div>' +
-      '<div class="row">Potenciar <span class="gold">' + dots(u.boost, TT.Bal.boostMax) + '</span>' + st(u) + '</div>';
+      '<div class="chips">' + ['at', 'mg', 'df', 'rs', 'vl', 'mv'].map(function (k) { return '<span>' + k.toUpperCase() + ' <b>' + s[k] + '</b></span>'; }).join('') + '</div>' +
+      '<div class="row pot">Potenciar <span class="gold">' + dots(u.boost, TT.Bal.boostMax) + '</span>' + st(u) + '</div>';
     if (u.shieldMax) {
       o += '<div class="row">' + (u.broken ? '<b class="broken">ROTO</b> <span class="dim">sin turno · ×1,5</span>' : 'Escudos <b>' + u.shield + '/' + u.shieldMax + '</b>') +
         ' · Débil: ' + u.weak.map(function (t) { return u.known[t] ? ic(t) : '<b>?</b>'; }).join(' ') + '</div>';

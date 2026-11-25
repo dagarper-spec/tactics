@@ -31,15 +31,16 @@ window.TT = window.TT || {};
 
     $('rotL').addEventListener('click', function () { TT.Cam.rotate(-1); });
     $('rotR').addEventListener('click', function () { TT.Cam.rotate(1); });
+    $('cfgBtn').addEventListener('click', function () { var c = $('cfg'); c.hidden = !c.hidden; });
     var A = TT.Audio; A.init();
     var sb = $('snd');
-    function sndLook() { sb.style.opacity = A.enabled ? 1 : 0.4; sb.textContent = A.enabled ? '\u266A' : '\u2715'; }
+    function sndLook() { sb.style.opacity = A.enabled ? 1 : 0.4; sb.textContent = (A.enabled ? '\u266A ' : '\u2715 ') + 'Sonido'; }
     sndLook();
     sb.addEventListener('click', function () { A.unlock(); A.toggle(); sndLook(); if (A.enabled) A.play('ui_select'); });
     function first() { A.unlock(); A.playList(['music_battle', 'music_battle2']); document.removeEventListener('pointerdown', first); }
     document.addEventListener('pointerdown', first);
     var qb = $('qual');
-    qb.textContent = 'Cal. ' + R.q.name;
+    qb.textContent = 'Calidad: ' + R.q.name;
     qb.addEventListener('click', function () {
       var o = TT.Quality.order, k = o[(o.indexOf(qKey) + 1) % o.length];
       TT.Quality.save(k); location.reload();
