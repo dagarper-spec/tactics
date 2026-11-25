@@ -11,12 +11,13 @@ window.TT = window.TT || {};
       var cont = $('hCont'), nw = $('hNew');
       cont.disabled = !S.exists(); nw.textContent = 'Nueva partida';
       $('hSave').textContent = S.summary();
-      cont.onclick = function () { TT.Audio.unlock(); TT.Audio.play('ui_confirm'); TT.Scenes.go('battle'); };   // hito 8: aquí irá el pueblo
+      cont.onclick = function () { TT.Audio.unlock(); TT.Audio.play('ui_confirm'); TT.Scenes.go('area', { id: S.flag('area') || 'village' }); };
       nw.onclick = function () {
         TT.Audio.unlock();
         if (S.exists() && !armed) { armed = true; nw.textContent = 'Pulsa otra vez: se borra la partida'; return; }
-        S.fresh(); TT.Audio.play('ui_confirm'); TT.Scenes.go('battle');
+        S.fresh(); TT.Audio.play('ui_confirm'); TT.Scenes.go('area', { id: 'village' });
       };
+      $('hBat').onclick = function () { TT.Audio.unlock(); TT.Audio.play('ui_confirm'); TT.Scenes.go('battle'); };
     }
   });
 })();

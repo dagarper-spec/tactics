@@ -34,6 +34,7 @@ window.TT = window.TT || {};
       C.distGoal = Math.max(C.minDist, Math.min(C.maxDist, C.distGoal * f));
     },
     pan: function (dx, dy) {
+      if (C.noPan) return;                                  // en el pueblo la cámara sigue al personaje
       var s = (2 * C.dist * Math.tan(C.camera.fov * Math.PI / 360)) / C.viewH;
       var sy = Math.sin(C.yaw), cy = Math.cos(C.yaw);
       var k = s / Math.sin(C.pitch);
@@ -65,6 +66,9 @@ window.TT = window.TT || {};
 
     // Enlaza entradas. onTap(clientX, clientY) se llama en un toque corto sin arrastre.
     bind: function (el, onTap) {
+      C.onTap = onTap;                                      // se puede volver a llamar al cambiar de escena
+      if (C.bound) return;
+      C.bound = true;
       var ptrs = {}, count = 0, pinch = 0, down = null;
       function dist2() {
         var k = Object.keys(ptrs), a = ptrs[k[0]], b = ptrs[k[1]];
@@ -92,7 +96,7 @@ window.TT = window.TT || {};
       function up(e) {
         if (!ptrs[e.pointerId]) return;
         delete ptrs[e.pointerId]; count = Math.max(0, count - 1);
-        if (down && count === 0 && e.type === 'pointerup' && down.moved <= 8 && performance.now() - down.t < 400 && onTap) onTap(e.clientX, e.clientY);
+        if (down && count === 0 && e.type === 'pointerup' && down.moved <= 8 && performance.now() - down.t < 400 && C.onTap) C.onTap(e.clientX, e.clientY);
         if (count === 0) down = null;
         pinch = 0;
       }

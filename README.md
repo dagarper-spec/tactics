@@ -14,3 +14,9 @@ Controles: tocar/clic = seleccionar unidad o mover a casilla azul · arrastrar =
 ## Escenas y guardado (Hito 7)
 - `js/scenes.js`: gestor de escenas con fundido (`TT.Scenes.add/go`). Escenas: `title` (js/scene_title.js) y `battle` (js/scene_battle.js). Cada escena devuelve su función `update(dt, tiempo)`; la clase `scene-<nombre>` de `<body>` muestra u oculta la interfaz por CSS.
 - `js/save.js`: partida en localStorage (`tt_save`): hechos (`flag`), resultados de batalla y habilidades. `Render.makeScene()/use()` permite una THREE.Scene por escena (pueblo en el hito 8).
+
+## Modo historia: pueblo (Hito 8)
+- `js/areas.js`: datos y lógica de las zonas (aldea, tienda, taberna) como filas de texto con leyenda; rutas BFS, puertas y edificios. Para añadir una zona basta con una entrada nueva en `DEF`.
+- `js/areatex.js` (texturas por código), `js/areaview.js` (3D: suelo, edificios con tejado, vallas, pozo, farolas, interiores con paredes que se ocultan hacia la cámara), `js/walker.js` (protagonista y NPC) y `js/scene_area.js` (toques, rutas, puertas, NPC, cámara que sigue).
+- Protagonista provisional `traveler` (js/specs_p.js); se sustituirá por una hoja de PixelLab con `tools/make_pl.py <hoja> <json> traveler`. Los NPC de la tienda y la taberna reutilizan los sprites de la Maga y la Clériga y sus diálogos son provisionales.
+- La batalla sigue disponible desde el botón «Probar batalla» del título.
