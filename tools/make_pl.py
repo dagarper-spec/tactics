@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Convierte una exportación de PixelLab (PNG + JSON) en un atlas para el motor.
-Uso: python3 tools/make_pl.py hoja.png hoja.json clase     (clase: warrior archer mage cleric soldier crossbow sorcerer captain)
+Uso: python3 tools/make_pl.py hoja.png hoja.json clase     (clase: warrior archer mage cleric soldier crossbow sorcerer captain) [altura en casillas, por defecto 1.25]
 Genera img/<clase>.png y js/sheet_<clase>.js, y añade el <script> a index.html si falta.
 Las animaciones se reconocen por palabras del nombre (ver KEYS). Solo se usan 5 direcciones; el oeste sale por espejo."""
 import sys, re, json
@@ -17,7 +17,7 @@ KEYS = [('remolino', 'whirl'), ('whirl', 'whirl'), ('escudo', 'shield'), ('shiel
         ('idle', 'idle'), ('repos', 'idle'), ('hurt', 'hurt'), ('herid', 'hurt'), ('daño', 'hurt'),
         ('die', 'die'), ('death', 'die'), ('muert', 'die'), ('dead', 'die'),
         ('dispar', 'shoot'), ('shoot', 'shoot'), ('arco', 'shoot'), ('ballest', 'shoot'), ('bow', 'shoot'),
-        ('lanz', 'cast'), ('cast', 'cast'), ('hechiz', 'cast'), ('magia', 'cast'), ('cura', 'cast'), ('spell', 'cast'),
+        ('lanz', 'cast'), ('throw', 'cast'), ('cast', 'cast'), ('hechiz', 'cast'), ('magia', 'cast'), ('cura', 'cast'), ('spell', 'cast'),
         ('espada', 'sword'), ('sword', 'sword'), ('golpe', 'sword'), ('ataque', 'sword'), ('attack', 'sword'), ('slash', 'sword')]
 
 def seq_of(name):
@@ -29,7 +29,7 @@ def seq_of(name):
 def pick(n, k):                                          # k fotogramas repartidos entre n
     return [int(round(i * n / k)) % n for i in range(k)]
 
-def main(src, jsn, name):
+def main(src, jsn, name, alto=1.25):
     j = json.load(open(jsn)); sp = j['spritesheet']; im = np.asarray(Image.open(src).convert('RGBA'))
     C = sp['cell_size']['width']
     def cell(r, c): return im[r * C:(r + 1) * C, c * C:(c + 1) * C].copy()
@@ -85,7 +85,7 @@ def main(src, jsn, name):
     atlas = Image.new('RGBA', (COLS * C, ((len(cache) + COLS - 1) // COLS) * C), (0, 0, 0, 0))
     for (cx, cy), t in tiles: atlas.paste(Image.fromarray(t, 'RGBA'), (cx * C, cy * C))
     atlas.save('img/%s.png' % name, optimize=True)
-    meta = {'cell': C, 'feet': feet, 'sc': round(1.25 / hgt, 5), 'por': [round(hgt * .58), round(hgt * .7), hgt + 1], 'n': count, 'frames': data}
+    meta = {'cell': C, 'feet': feet, 'sc': round(float(alto) / hgt, 5), 'por': [round(hgt * .58), round(hgt * .7), hgt + 1], 'n': count, 'frames': data}
     open('js/sheet_%s.js' % name, 'w').write('window.TT = window.TT || {};\nTT.SheetData = TT.SheetData || {};\nTT.SheetData.%s = %s;\n// FIN DE ARCHIVO\n' % (name, json.dumps(meta, separators=(',', ':'))))
     tag = '<script src="js/sheet_%s.js"></script>' % name
     h = open('index.html').read()
@@ -94,4 +94,4 @@ def main(src, jsn, name):
         open('index.html', 'w').write(h[:last.end()] + '\n' + tag + h[last.end():])
     print(name, len(names), 'fotogramas,', len(cache), 'únicos ->', atlas.size, '| alto', hgt, 'pies', feet, '| secuencias', count, '| sin usar', ign or '-')
 
-main(*sys.argv[1:4])
+main(*sys.argv[1:5])
