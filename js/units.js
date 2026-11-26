@@ -22,20 +22,28 @@ window.TT = window.TT || {};
 
   var U = TT.Units = { list: [] };
 
-  U.init = function () {
-    U.list = [];
-    [['heroes', 0], ['enemies', 2]].forEach(function (g) {
-      var grp = TT.Start[g[0]];
-      Object.keys(grp).forEach(function (t) {
-        var d = TT.Defs[t];
-        U.list.push({
-          id: t, type: t, name: d.name, side: d.side, hp: d.hp, maxHp: d.hp,
-          st: { at: d.at, mg: d.mg, df: d.df, rs: d.rs, vl: d.vl, mv: d.mv },
-          x: grp[t][0], y: grp[t][1], face: g[1], moved: false, undo: null,
-          weak: (d.weak || []).slice(), shield: (d.weak || []).length, shieldMax: (d.weak || []).length,
-          known: {}, broken: false, boost: 0, cd: {}, taunt: 0, slow: 0
-        });
-      });
+  var KEYS = ['at', 'mg', 'df', 'rs', 'vl', 'mv'];
+  function make(id, type, name, side, s, weak, x, y, face, lv) {
+    return {
+      id: id, type: type, name: name, side: side, lv: lv, hp: s.hp, maxHp: s.hp,
+      st: { at: s.at, mg: s.mg, df: s.df, rs: s.rs, vl: s.vl, mv: s.mv },
+      x: x, y: y, face: face, moved: false, undo: null,
+      weak: weak.slice(), shield: weak.length, shieldMax: weak.length,
+      known: {}, broken: false, boost: 0, cd: {}, taunt: 0, slow: 0
+    };
+  }
+
+  // Crea las unidades de una batalla: héroes desde el grupo guardado, enemigos desde TT.Defs.
+  U.init = function (enc) {
+    enc = enc || TT.Encounters.get(); TT.Encounters.cur = enc; U.list = [];
+    enc.heroes.forEach(function (h) {
+      var r = TT.Party.get(h.id);
+      U.list.push(make(r.id, r.cls, r.name, 'hero', TT.Party.stats(r), [], h.x, h.y, 0, r.level));
+    });
+    enc.enemies.forEach(function (e) {
+      var d = TT.Defs[e.type], m = e.mod || {}, s = { hp: Math.round(d.hp * (m.hp || 1)) };
+      KEYS.forEach(function (k) { s[k] = Math.round(d[k] * (m[k] || 1)); });
+      U.list.push(make(e.id || e.type, e.type, d.name, 'enemy', s, d.weak || [], e.x, e.y, 2, e.lv || 1));
     });
   };
 

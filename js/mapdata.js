@@ -84,11 +84,6 @@ window.TT = window.TT || {};
     label: function (x, y) { return 'ABCDEFGHIJ'.charAt(x) + (y + 1); }
   };
 
-  // Posiciones iniciales (Hito 2 las usará).
-  TT.Start = {
-    heroes: { warrior: [4, 7], archer: [2, 7], mage: [3, 8], cleric: [5, 8] },
-    enemies: { captain: [4, 2], soldier: [2, 2], sorcerer: [3, 1], crossbow: [5, 1] }
-  };
   // Decorado no ligado a casillas: x,y de casilla + desplazamiento en mundo.
   TT.Props = {
     torches: [], flags: []                                  // sin antorchas ni banderas (el fuerte se quitó)

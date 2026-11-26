@@ -46,7 +46,7 @@ window.TT = window.TT || {};
 
     var retry = false;                                        // "Jugar de nuevo" salta el título
     try { retry = sessionStorage.getItem('tt_retry') === '1'; sessionStorage.removeItem('tt_retry'); } catch (e) {}
-    TT.Save.load();
+    TT.Save.load(); TT.Party.load();
     TT.Scenes.go(retry ? 'battle' : 'title', null, true);
   }
 

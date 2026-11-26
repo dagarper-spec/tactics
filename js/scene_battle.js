@@ -3,7 +3,7 @@ window.TT = window.TT || {};
 (function () {
   TT.Scenes.add('battle', {
     three: true,
-    enter: function () {
+    enter: function (arg) {
       var R = TT.R, A = TT.Audio, time = 0;
       R.use(R.makeScene()); TT.Cam.noPan = false; TT.Cam.dist = TT.Cam.distGoal = 23;
       $('title').textContent = 'El paso del río';
@@ -11,7 +11,7 @@ window.TT = window.TT || {};
       var scenery = TT.Scenery.build(R.scene, R.q);
       var parts = TT.Particles.build(R.scene, R.q);
 
-      TT.Units.init();
+      TT.Units.init(TT.Encounters.get(arg && arg.enc));
       var view = TT.UnitView.build(R.scene);
       var fx = TT.FX.build(R.scene);
       TT.Impact.build(R.scene);

@@ -7,7 +7,7 @@ window.TT = window.TT || {};
   TT.Scenes.add('title', {
     three: false,
     enter: function () {
-      var S = TT.Save; S.load(); armed = false;
+      var S = TT.Save; S.load(); TT.Party.load(); armed = false;
       var cont = $('hCont'), nw = $('hNew');
       cont.disabled = !S.exists(); nw.textContent = 'Nueva partida';
       $('hSave').textContent = S.summary();
@@ -15,7 +15,7 @@ window.TT = window.TT || {};
       nw.onclick = function () {
         TT.Audio.unlock();
         if (S.exists() && !armed) { armed = true; nw.textContent = 'Pulsa otra vez: se borra la partida'; return; }
-        S.fresh(); TT.Audio.play('ui_confirm'); TT.Scenes.go('area', { id: 'village' });
+        S.fresh(); TT.Party.load(); TT.Audio.play('ui_confirm'); TT.Scenes.go('area', { id: 'village' });
       };
       $('hBat').onclick = function () { TT.Audio.unlock(); TT.Audio.play('ui_confirm'); TT.Scenes.go('battle'); };
     }

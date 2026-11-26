@@ -6,12 +6,13 @@ window.TT = window.TT || {};
   S.load = function () {
     var d = null;
     try { var t = localStorage.getItem(KEY); d = t ? JSON.parse(t) : null; } catch (e) { d = null; }
-    S.data = d && d.v === 1 ? d : null;
+    if (d && d.v === 1) { d.v = 2; d.party = null; }          // migra el formato anterior (sin grupo guardado)
+    S.data = d && d.v === 2 ? d : null;
     return S.data;
   };
   S.exists = function () { return !!S.data; };
   S.commit = function () { try { localStorage.setItem(KEY, JSON.stringify(S.data)); } catch (e) {} };
-  S.fresh = function () { S.data = { v: 1, flags: {}, battles: {}, skills: {}, t: Date.now() }; S.commit(); return S.data; };
+  S.fresh = function () { S.data = { v: 2, flags: {}, battles: {}, skills: {}, party: null, t: Date.now() }; S.commit(); return S.data; };
   S.wipe = function () { S.data = null; try { localStorage.removeItem(KEY); } catch (e) {} };
 
   // Hechos de la historia: flag('x') lee, flag('x', valor) escribe.
