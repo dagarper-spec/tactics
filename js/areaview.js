@@ -31,7 +31,8 @@ window.TT = window.TT || {};
         var m = new THREE.Mesh(new THREE.PlaneGeometry(size, size), new THREE.MeshBasicMaterial({ map: glowTex, color: col, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
         m.position.set(x, y, z); group.add(m); bills.push(m); glows.push(m);
       }
-      var cx = a.W / 2 - 0.5, cz = a.H / 2 - 0.5;
+      var cx = a.W / 2 - 0.5, cz = a.H / 2 - 0.5, smokes = [];
+      var X = { mesh: mesh, billboard: billboard, blob: blob, glow: glow, group: group, bills: bills };
 
       // Suelo
       var fl;
@@ -41,7 +42,7 @@ window.TT = window.TT || {};
       fl.material.map.repeat.set(1, 1); fl.material.map.wrapS = fl.material.map.wrapT = THREE.ClampToEdgeWrapping;
       picks.push(fl);
 
-      var wood = lam(AT.wood()), stone = lam(AT.stone());
+      var wood = lam(AT.wood()), stone = lam(AT.stone()); X.wood = wood; X.stone = stone;
       var gx, gy;
       if (out) {
         // Edificios: paredes con puerta al sur, ventanas y tejado a cuatro aguas.
@@ -51,15 +52,18 @@ window.TT = window.TT || {};
           var mats = [side, side, lam(AT.roof(d.roof)), lam(AT.roof(d.roof)), lam(AT.facade(b.w, d.wall, { door: door, label: d.label }), 1, 1), back];
           var body = mesh(new THREE.BoxGeometry(b.w, WALL_H, b.h), mats, b.x0 + (b.w - 1) / 2, WALL_H / 2, b.y0 + (b.h - 1) / 2);
           body.userData.building = b; picks.push(body);
-          var rg = new THREE.ConeGeometry(0.7071, 1.1, 4, 1); rg.rotateY(Math.PI / 4);
-          var roof = mesh(rg, lam(AT.roof(d.roof), 4, 2), body.position.x, WALL_H + 0.55, body.position.z);
-          roof.scale.set(b.w + 0.5, 1, b.h + 0.5); roof.userData.building = b; picks.push(roof);
-          mesh(new THREE.BoxGeometry(0.34, 0.8, 0.34), stone, body.position.x + b.w * 0.25, WALL_H + 0.6, body.position.z - 0.2);   // chimenea
+          var roof = TT.AreaProps.roof(b.w, b.h, lam(AT.roof(d.roof)), lam(AT.facade(2, d.wall, { blank: true })));
+          roof.position.set(body.position.x, WALL_H, body.position.z); roof.castShadow = sh; roof.receiveShadow = sh; roof.userData.building = b; group.add(roof); picks.push(roof);
+          var chx = body.position.x + (b.w >= b.h ? b.w * 0.25 : 0), chz = body.position.z + (b.w >= b.h ? -0.2 : b.h * 0.25);
+          mesh(new THREE.BoxGeometry(0.34, 1.3, 0.34), stone, chx, WALL_H + 0.95, chz);                       // chimenea y humo
+          smokes.push(TT.AreaProps.smoke(X, chx, WALL_H + 1.7, chz));
+          if (b.door) mesh(new THREE.BoxGeometry(0.9, 0.1, 0.45), stone, b.door.x, 0.05, b.door.y - 0.25, false);   // peldaño
           if (b.door) glow(b.door.x, 1.1, b.door.y + 0.2, 1.1, 0xffb868);
         });
         var seed = 11, tc = [], tm = [];
         for (gy = 0; gy < a.H; gy++) for (gx = 0; gx < a.W; gx++) {
           var c = Ar.ch(a, gx, gy);
+          if (TT.AreaProps.cell(X, c, gx, gy, true)) continue;
           if (c === 'T') { var ts = seed++ % 5; if (!tc[ts]) { tc[ts] = TT.Sprites.tree(ts); tm[ts] = new THREE.MeshBasicMaterial({ map: PX.tex(tc[ts]), transparent: true, alphaTest: 0.4, color: 0xe8e2f2 }); } billboard(tc[ts], 1 / 20, gx, gy, tm[ts]); blob(gx, gy, 0.55); }
           else if (c === 'f') {
             var along = Ar.ch(a, gx - 1, gy) === 'f' || Ar.ch(a, gx + 1, gy) === 'f';
@@ -76,6 +80,7 @@ window.TT = window.TT || {};
             glow(gx, 1.6, gy, 1.6, 0xff9a40);
           }
         }
+        TT.AreaProps.flowers(X, a);
         // Sol: la sombra cubre todo el pueblo.
         var sun = scene.userData.sun; sun.target.position.set(cx, 0, cz); sun.position.set(cx + 3, 8, cz + 11);
         var sc = sun.shadow.camera; if (sc) { var r = Math.max(a.W, a.H) / 2 + 3; sc.left = -r; sc.right = r; sc.top = r; sc.bottom = -r; sc.far = 60; sc.updateProjectionMatrix(); }
@@ -101,6 +106,7 @@ window.TT = window.TT || {};
         var shelf = lam(AT.shelf());
         for (gy = 0; gy < a.H; gy++) for (gx = 0; gx < a.W; gx++) {
           var c2 = Ar.ch(a, gx, gy);
+          if (TT.AreaProps.cell(X, c2, gx, gy, false)) continue;
           if (c2 === 'k') mesh(new THREE.BoxGeometry(1, 1.7, 0.45), shelf, gx, 0.85, gy - 0.25);
           else if (c2 === 'c') { mesh(new THREE.BoxGeometry(1, 0.9, 0.9), wood, gx, 0.45, gy); mesh(new THREE.BoxGeometry(1.02, 0.07, 0.96), stone, gx, 0.92, gy); }
           else if (c2 === 't') { mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.75, 6), wood, gx, 0.37, gy); mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.07, 12), wood, gx, 0.78, gy); }
@@ -116,6 +122,7 @@ window.TT = window.TT || {};
         update: function (dt, yaw, time, cam) {
           for (var i = 0; i < bills.length; i++) bills[i].rotation.y = yaw;
           for (i = 0; i < glows.length; i++) glows[i].material.opacity = 0.75 + 0.2 * Math.sin(time * 5 + i * 2.1);
+          for (i = 0; i < smokes.length; i++) smokes[i](time);
           for (i = 0; i < walls.length; i++) walls[i].m.visible = walls[i].test(cam);
         },
         dispose: function () {

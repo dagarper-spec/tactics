@@ -1,26 +1,27 @@
 // Zonas del modo historia (pueblo e interiores): datos y lógica de casillas (paso, puertas, rutas). Sin dependencias de vista.
-// Leyenda exterior: . hierba · , camino · T árbol · f valla · w pozo · l farola · H/S/B edificios · h/s/b/x puertas.
-// Leyenda interior: . suelo · e salida · c mostrador · k estantería · t mesa · o barril · r alfombra.
+// Leyenda exterior: . hierba · , camino · : adoquín · T árbol · f valla · w pozo · l farola · u arbusto · q caja · o barril · v banco · H/S/B/M/N edificios · h/s/b/m/n/x puertas.
+// Leyenda interior: . suelo · e salida · c mostrador · k estantería · t mesa · s taburete · p chimenea · o barril · r alfombra (se pisa).
 window.TT = window.TT || {};
 (function () {
   var DEF = {
     village: {
-      name: 'Aldea del Paso', kind: 'out', solid: 'TfwlHSB',
-      rows: ['TTTTTTTTTTTTTTTTTT', 'T..T.............T', 'T.HHH...SSSS.BBBBT', 'T.HHH...SSSS.BBBBT', 'T..h.....s....b..T', 'T.,,,,,,,,,,,,,,.T',
-        'T.f..,........,.lT', 'T.f..,...w....,..T', 'T....,........,..T', 'T..T.,,,,,,,,,,..T', 'T....,.......T...T', 'T.l..,..T.....T..T', 'TTTTTTTTTxTTTTTTTT'],
-      b: { H: { door: 'h', wall: '#E8D9B8', roof: '#9C4A3A', label: '' }, S: { door: 's', wall: '#D9C7A0', roof: '#3F6FA8', label: 'TIENDA' }, B: { door: 'b', wall: '#C9A98A', roof: '#8A3A2A', label: 'TABERNA' } },
-      doors: { h: { msg: 'Tu casa. Por ahora no hace falta volver.' }, s: { to: 'shop', at: 'e' }, b: { to: 'bar', at: 'e' }, x: { msg: 'El camino sigue hacia el río, pero aún no es hora de partir.' } },
+      name: 'Aldea del Paso', kind: 'out', solid: 'TfwlHSBMNuqov',
+      rows: ['TTTTTTTTTTTTTTTTTT', 'T..T.............T', 'T.HHH...SSSS.BBBBT', 'T.HHH.u.SSSS.BBBBT', 'T..h..q..s.o..bv.T', 'T.,,,,,,,,,,,,,,.T', 'T.f..,..:::...,.lT', 'T.fMM,..:w:NNN,..T', 'T..MM,..:::NNN,..T', 'T..Tm,,,,,,,n,,..T', 'T....,.......T...T', 'T.l..,..T.....T..T', 'TTTTTTTTTxTTTTTTTT'],
+      b: { H: { door: 'h', wall: '#E8D9B8', roof: '#9C4A3A', label: '' }, S: { door: 's', wall: '#D9C7A0', roof: '#3F6FA8', label: 'TIENDA' }, B: { door: 'b', wall: '#C9A98A', roof: '#8A3A2A', label: 'TABERNA' },
+        M: { door: 'm', wall: '#C8B890', roof: '#5A7A4A', label: '' }, N: { door: 'n', wall: '#E0C8A0', roof: '#7A4A6A', label: '' } },
+      doors: { h: { msg: 'Tu casa. Por ahora no hace falta volver.' }, s: { to: 'shop', at: 'e' }, b: { to: 'bar', at: 'e' }, m: { msg: 'La puerta está cerrada con llave.' }, n: { msg: 'Nadie contesta. Parece que no hay nadie en casa.' },
+        x: { msg: 'El camino sigue hacia el río, pero aún no es hora de partir.' } },
       spawn: 'h', npcs: []
     },
     shop: {
-      name: 'Tienda', kind: 'room', solid: 'ckto', theme: { wall: '#B89868', floor: '#7A5634' },
-      rows: ['kkkkkkkkk', '.........', '.ccccc...', '.........', 'o.......o', '.........', '....e....'],
+      name: 'Tienda', kind: 'room', solid: 'cktops', theme: { wall: '#B89868', floor: '#7A5634' },
+      rows: ['kkkkkkkkk', '.........', '.ccccc...', '..rrr....', 'o.rrr...o', '.........', '....e....'],
       doors: { e: { to: 'village', at: 's', out: [0, -1] } }, spawn: 'e',
       npcs: [{ type: 'mage', x: 3, y: 1, face: 2, name: 'Mercader', line: 'Bienvenido. De momento no tengo nada a la venta; vuelve pronto.' }]
     },
     bar: {
-      name: 'Taberna', kind: 'room', solid: 'ckto', theme: { wall: '#8E6A4A', floor: '#5E3E26' },
-      rows: ['kkkkkkkkkkk', '...........', '.ccccccc...', '...........', '.t...t...t.', '...........', 'o.........o', '....e......'],
+      name: 'Taberna', kind: 'room', solid: 'cktops', theme: { wall: '#8E6A4A', floor: '#5E3E26' },
+      rows: ['kkkkkkkkkkk', '.........p.', '.ccccccc...', '..rrrrrrr..', '.t...t...t.', '.s...s...s.', 'o.........o', '....e......'],
       doors: { e: { to: 'village', at: 'b', out: [0, -1] } }, spawn: 'e',
       npcs: [{ type: 'cleric', x: 4, y: 1, face: 2, name: 'Tabernera', line: 'La mejor sidra del paso. Hoy hay poca gente, siéntete como en casa.' }]
     }
