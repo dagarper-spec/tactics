@@ -91,8 +91,7 @@ window.TT = window.TT || {};
   };
   // Decorado no ligado a casillas: x,y de casilla + desplazamiento en mundo.
   TT.Props = {
-    torches: [[3, 0, 0, -0.4, 0.4], [4, 0, 0, -0.4, 0.4], [3, 3, -0.45, 0.45], [5, 3, 0.45, 0.45], [3, 6, -0.45, -0.45], [5, 6, 0.45, -0.45]],
-    flags: [[2, 0, -0.25, -0.25, 1.5], [5, 0, 0.25, -0.25, 1.5]]
+    torches: [], flags: []                                  // sin antorchas ni banderas (el fuerte se quitó)
   };
 })();
 // FIN DE ARCHIVO

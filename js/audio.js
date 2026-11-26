@@ -6,7 +6,7 @@ window.TT = window.TT || {};
   var last = {};
 
   // Lista completa de sonidos esperados (ver audio/README.md).
-  A.NAMES = ['music_battle', 'music_battle2', 'music_victory', 'music_defeat',
+  A.NAMES = ['music_town', 'music_battle', 'music_battle2', 'music_victory', 'music_defeat',
     'ui_select', 'ui_confirm', 'ui_cancel', 'ui_turn', 'step',
     'hit_slash', 'hit_blunt', 'hit_pierce', 'hit_fire', 'hit_ice', 'hit_light', 'hit_back', 'death',
     'shield_hit', 'break', 'recover', 'boost', 'taunt', 'heal'];
@@ -65,6 +65,7 @@ window.TT = window.TT || {};
 
   // Música: una a la vez, con fundido. loop = false para victoria/derrota.
   A.playMusic = function (name, loop) {
+    if (A.want === name && A.cur && !A.list) return;       // ya suena: no reiniciar al cambiar de zona
     A.want = name; A.wantLoop = loop !== false;
     if (!A.ctx) return;
     A.stopMusic(true);

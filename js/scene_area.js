@@ -20,14 +20,14 @@ window.TT = window.TT || {};
       var ray = new THREE.Raycaster(), plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit = new THREE.Vector3();
       S = { scene: scene, view: view }; TT.Scenes.ctx = { player: player, npcs: npcs, area: a };
 
-      C.noPan = true; C.dist = C.distGoal = out ? 15 : 10.5;
+      C.noPan = true; C.dist = C.distGoal = out ? 21 : 12;                   // empieza con el zoom lejano
       C.goal.set(player.pos.x, 0.6, player.pos.z); C.target.copy(C.goal);
       $('title').textContent = a.name;
       TT.HUD.buttons([]);
       var hint = '<b>' + a.name + '</b><br><span class="dim">Toca el suelo para moverte' + (out ? ' y las puertas para entrar.' : '; la alfombra de la entrada es la salida.') + '</span>';
       say(hint);
       if (TT.Save.exists()) TT.Save.flag('area', a.id);
-      A.stopMusic();
+      A.list = false; A.playMusic('music_town', true);
       player.walk([{ x: door.x + step[0], y: door.y + step[1] }]);          // acaba de salir por la puerta
 
       function arrive(cell) {
