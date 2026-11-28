@@ -35,6 +35,7 @@ window.TT = window.TT || {};
   }
 
   S.tree = function (seed) {
+    var pk = TT.Pack && TT.Pack.get('tree', seed); if (pk) return pk;
     var r = PX.rng(seed), c = PX.canvas(24, 32), g = c.getContext('2d');
     g.fillStyle = P.wood.mid; g.fillRect(10, 18, 4, 12);
     g.fillStyle = P.wood.dark; g.fillRect(13, 18, 1, 12); g.fillRect(9, 28, 6, 2);

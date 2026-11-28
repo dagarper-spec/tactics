@@ -14,7 +14,7 @@ window.TT = window.TT || {};
 
       // Plano vertical con la base en el origen; gira hacia la cámara.
       function billboard(canvas, scale, x, y, z, mat) {
-        var w = canvas.width * scale, h = canvas.height * scale;
+        scale = canvas.sc || scale; var w = canvas.width * scale, h = canvas.height * scale;
         var g = new THREE.PlaneGeometry(w, h); g.translate(0, h / 2, 0);
         var m = new THREE.Mesh(g, mat || new THREE.MeshBasicMaterial({ map: texOf(canvas), transparent: true, alphaTest: 0.4, color: tint }));
         m.position.set(x, y, z);

@@ -99,12 +99,14 @@ window.TT = window.TT || {};
     return o.c;
   };
   T.flower = function (i) {
+    var pk = TT.Pack && TT.Pack.get('flower', i); if (pk) return pk;
     var o = ctx(8, 8), g = o.g, c = ['#E0587A', '#F2E070', '#F2F2F2', '#B58CFF'][i % 4];
     g.fillStyle = '#3F7A34'; g.fillRect(3, 4, 1, 4); g.fillRect(1, 6, 2, 1); g.fillRect(5, 5, 2, 1);
     g.fillStyle = c; g.fillRect(2, 1, 3, 3); g.fillStyle = '#FFF6C0'; g.fillRect(3, 2, 1, 1);
     return o.c;
   };
   T.bush = function () {
+    var pk = TT.Pack && TT.Pack.get('bush', 0); if (pk) return pk;
     var o = ctx(20, 16), g = o.g, r = PX.rng(9), L = ['#2F5A2E', '#4C8A3A', '#7DB356'];
     [[10, 10, 8, 0], [6, 9, 5, 1], [14, 9, 5, 1], [10, 6, 5, 2]].forEach(function (b) {
       g.fillStyle = L[b[3]]; for (var y = -b[2]; y <= b[2]; y++) for (var x = -b[2]; x <= b[2]; x++) if (x * x + y * y <= b[2] * b[2]) g.fillRect(b[0] + x, b[1] + y, 1, 1);

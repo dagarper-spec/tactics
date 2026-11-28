@@ -19,7 +19,7 @@ window.TT = window.TT || {};
         m.castShadow = sh && cast !== false; m.receiveShadow = sh; group.add(m); return m;
       }
       function billboard(canvas, scale, x, z, mat) {
-        var w = canvas.width * scale, h = canvas.height * scale, g = new THREE.PlaneGeometry(w, h); g.translate(0, h / 2, 0);
+        scale = canvas.sc || scale; var w = canvas.width * scale, h = canvas.height * scale, g = new THREE.PlaneGeometry(w, h); g.translate(0, h / 2, 0);
         var m = new THREE.Mesh(g, mat || new THREE.MeshBasicMaterial({ map: PX.tex(canvas), transparent: true, alphaTest: 0.4, color: 0xe8e2f2 }));
         m.position.set(x, 0, z); group.add(m); bills.push(m); return m;
       }
