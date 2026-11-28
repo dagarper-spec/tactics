@@ -32,7 +32,7 @@ window.TT = window.TT || {};
         m.position.set(x, y, z); group.add(m); bills.push(m); glows.push(m);
       }
       var cx = a.W / 2 - 0.5, cz = a.H / 2 - 0.5, smokes = [];
-      var X = { a: a, mesh: mesh, billboard: billboard, blob: blob, glow: glow, group: group, bills: bills };
+      var X = { mesh: mesh, billboard: billboard, blob: blob, glow: glow, group: group, bills: bills };
 
       // Suelo
       var fl;
