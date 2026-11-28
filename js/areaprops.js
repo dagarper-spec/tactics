@@ -21,6 +21,25 @@ window.TT = window.TT || {};
     return m;
   };
 
+  // Muebles de pixel art (TT.Pack). Devuelve true si c es un mueble y está cargado; si no, se dibuja la versión 3D.
+  function furniture(X, c, x, y) {
+    var K = TT.Pack, a = X.a, f, n = 0, r = 0.45;
+    if (!K || !K.ready) return false;
+    if (c === 'c') {                                                     // mostrador: extremos y tramos de 32 px
+      f = K.furn('counter'); if (!f) return false;
+      var L = Ar.ch(a, x - 1, y) !== 'c', Rt = Ar.ch(a, x + 1, y) !== 'c', cc = document.createElement('canvas'), g;
+      cc.width = 32; cc.height = f.height; g = cc.getContext('2d');
+      if (Rt && !L) { g.translate(32, 0); g.scale(-1, 1); }
+      g.drawImage(f, L || Rt ? 0 : 32, 0, 32, f.height, 0, 0, 32, f.height); cc.sc = 1 / 32;
+      X.billboard(cc, 1 / 32, x, y); return true;
+    }
+    var nm = { a: 'chest', s: 'stool', o: 'barrel', g: 'wardrobe', p: 'hearth', y: 'plant' + ((x + y) % 4), t: (x + y) % 2 ? 'table' : 'round' }[c];
+    if (!nm || !(f = K.furn(nm))) return false;
+    X.billboard(f, f.sc, x, c === 'p' ? y - 0.3 : y); X.blob(x, y, nm === 'hearth' ? 0.5 : r);
+    if (c === 'p') { X.glow(x, 0.4, y + 0.1, 1.3, 0xff8a30); X.glow(x, 0.3, y + 0.1, 0.7, 0xffd070); }
+    return true;
+  }
+
   function lam(c) { return new B.MeshLambertMaterial({ map: PX.tex(c) }); }
 
   // X = { mesh(geo, mat, x, y, z, cast), billboard(canvas, scale, x, z, mat), blob(x, z, r), glow(x, y, z, size, color), wood, stone, group }
@@ -33,6 +52,8 @@ window.TT = window.TT || {};
       if (c === 'u') { if (!X.bush) X.bush = AT.bush(); X.billboard(X.bush, 1 / 20, x, y); X.blob(x, y, 0.5); return true; }
       return false;
     }
+    var f = furniture(X, c, x, y);
+    if (f) return true;
     if (c === 'a') { X.mesh(new B.BoxGeometry(0.8, 0.5, 0.55), X.wood, x, 0.25, y); X.mesh(new B.BoxGeometry(0.84, 0.12, 0.59), X.stone, x, 0.56, y, false); return true; }
     if (c === 'r') { if (!X.rug) X.rug = lam(AT.rug()); var m = X.mesh(new B.PlaneGeometry(0.96, 0.96), X.rug, x, 0.015, y, false); m.rotation.x = -Math.PI / 2; m.castShadow = false; return true; }
     if (c === 's') { X.mesh(new B.CylinderGeometry(0.2, 0.22, 0.45, 8), X.wood, x, 0.22, y); return true; }
