@@ -30,34 +30,60 @@ window.TT = window.TT || {};
     o.g.fillStyle = PX.shade(col, 0.7); o.g.fillRect(0, 22, 16, 10); o.g.fillStyle = PX.shade(col, 0.5); o.g.fillRect(0, 22, 16, 1);
     return o.c;
   };
-  // Fachada de w casillas de ancho. opt: { door: columna o -1, label, glass }
+  function R(g, c, x, y, w, h) { g.fillStyle = c; g.fillRect(x, y, w, h); }
+  // Ventana de entramado con cristales cálidos (luz de dentro).
+  function win(g, cx, y, w, h) {
+    R(g, '#3B2214', cx - w / 2 - 2, y - 2, w + 4, h + 4); R(g, '#E8962E', cx - w / 2, y, w, h); R(g, '#FFC24D', cx - w / 2, y, w, h >> 1); R(g, '#FFE9A8', cx - w / 2 + 1, y + 1, 3, 2);
+    R(g, '#3B2214', cx - 1, y, 2, h); R(g, '#3B2214', cx - w / 2, y + (h >> 1) - 1, w, 2);
+  }
+  // Fachada de w casillas (32 px por casilla, estilo casa de entramado). opt: { door: columna o -1, label, blank, roof }
   T.facade = function (w, col, opt) {
-    var o = ctx(w * 16, 32), g = o.g, i, wood = '#6B4A2F';
-    g.fillStyle = col; g.fillRect(0, 0, w * 16, 32); noise(g, w * 16, 32, col, 21 + w, w * 30);
-    g.fillStyle = '#8A8478'; g.fillRect(0, 27, w * 16, 5); noise(g, w * 16, 32, '#8A8478', 5, w * 10);
-    g.fillStyle = '#4A3322'; g.fillRect(0, 0, 2, 32); g.fillRect(w * 16 - 2, 0, 2, 32); g.fillRect(0, 0, w * 16, 2); g.fillRect(0, 24, w * 16, 1);   // entramado de madera
-    for (i = 1; i < w; i++) g.fillRect(i * 16 - 1, 0, 2, 27);
+    var W = w * 32, o = ctx(W, 64), g = o.g, i, k, D = '#3B2214', M = '#5E3A22', st = '#6A7079';
+    R(g, col, 0, 0, W, 64); noise(g, W, 64, col, 21 + w, w * 60);
+    R(g, st, 0, 50, W, 14); noise(g, W, 64, st, 5, w * 24);                              // zócalo de piedra
+    for (k = 50; k < 64; k += 5) { R(g, '#3F454E', 0, k, W, 1); for (i = (k % 10 ? 0 : 6); i < W; i += 12) R(g, '#3F454E', i, k, 1, 5); }
+    R(g, '#98A0AB', 0, 51, W, 1);
+    R(g, D, 0, 0, W, 5); R(g, M, 0, 1, W, 1); R(g, D, 0, 46, W, 4); R(g, M, 0, 47, W, 1);   // vigas
+    R(g, D, 0, 0, 4, 50); R(g, M, 1, 0, 1, 50); R(g, D, W - 4, 0, 4, 50); R(g, M, W - 3, 0, 1, 50);
+    for (i = 1; i < w; i++) { R(g, D, i * 32 - 2, 0, 4, 50); R(g, M, i * 32 - 1, 0, 1, 50); }
     for (i = 0; i < w; i++) {
-      var cx = i * 16 + 8;
+      var cx = i * 32 + 16;
+      for (k = 0; k < 7; k++) { R(g, D, i * 32 + 4 + k, 5 + k, 2, 2); R(g, D, i * 32 + 26 - k, 5 + k, 2, 2); }   // tornapuntas
       if (opt.door === i) {
-        g.fillStyle = '#2A1B10'; g.fillRect(cx - 6, 8, 12, 19); g.fillStyle = wood; g.fillRect(cx - 5, 9, 10, 18); g.fillStyle = '#8A6038'; g.fillRect(cx - 5, 9, 10, 2);
-        g.fillStyle = '#2A1B10'; g.fillRect(cx, 9, 1, 18); g.fillStyle = '#E0B24D'; g.fillRect(cx + 2, 18, 2, 2);
+        var rf = opt.roof || '#9C4A3A';
+        R(g, D, cx - 8, 16, 16, 34); R(g, '#7A3A22', cx - 7, 17, 14, 33); R(g, '#4E2414', cx - 3, 17, 1, 33); R(g, '#4E2414', cx + 2, 17, 1, 33); R(g, '#A0603A', cx - 7, 17, 14, 1);
+        R(g, '#1B1020', cx + 3, 33, 4, 4); R(g, '#C9A24B', cx + 4, 34, 2, 2);                                      // aldaba
+        R(g, PX.shade(rf, 0.55), cx - 13, 8, 26, 8); R(g, rf, cx - 12, 9, 24, 5); R(g, PX.shade(rf, 1.25), cx - 12, 9, 24, 1); R(g, PX.shade(rf, 0.75), cx - 12, 12, 24, 1);   // tejadillo
+        for (k = -12; k < 12; k += 6) R(g, PX.shade(rf, 0.75), cx + k, 9, 1, 5);
       } else if (!opt.blank) {
-        g.fillStyle = '#4A3322'; g.fillRect(cx - 4, 9, 8, 9); g.fillStyle = '#FFD98A'; g.fillRect(cx - 3, 10, 6, 7);
-        g.fillStyle = '#4A3322'; g.fillRect(cx, 10, 1, 7); g.fillRect(cx - 3, 13, 6, 1);
-        g.fillStyle = '#5A3A22'; g.fillRect(cx - 5, 18, 10, 3);                       // jardinera con flores
-        for (var f = 0; f < 5; f++) { g.fillStyle = ['#E0587A', '#F2E070', '#F2F2F2'][(f + i) % 3]; g.fillRect(cx - 4 + f * 2, 17, 2, 2); }
+        win(g, cx, 14, 12, 18); R(g, M, cx - 10, 34, 20, 3); R(g, '#8A6038', cx - 10, 34, 20, 1);
+        for (k = 0; k < 6; k++) R(g, ['#E0587A', '#F2E070', '#F2F2F2'][(k + i) % 3], cx - 8 + k * 3, 32, 2, 2);        // flores en el alféizar
       }
     }
     if (opt.label) {                                                  // rótulo sobre la puerta
-      var n = opt.label.length * 5 + 4, x0 = opt.door * 16 + 8 - n / 2;
-      g.fillStyle = '#4A3322'; g.fillRect(x0, 1, n, 7); g.fillStyle = '#E8C868'; g.font = 'bold 7px monospace'; g.textBaseline = 'top'; g.fillText(opt.label, x0 + 2, 1);
+      var n = opt.label.length * 7 + 6, x0 = opt.door * 32 + 16 - n / 2;
+      R(g, D, x0, 0, n, 9); R(g, '#E8C868', x0 + 1, 1, n - 2, 1); g.fillStyle = '#E8C868'; g.font = 'bold 8px monospace'; g.textBaseline = 'top'; g.fillText(opt.label, x0 + 3, 1);
     }
     return o.c;
   };
+  // Hastial del tejado (se ve la zona central de la textura): entramado con una ventana encendida.
+  T.gable = function (col) {
+    var o = ctx(64, 64), g = o.g, k, D = '#3B2214';
+    R(g, col, 0, 0, 64, 64); noise(g, 64, 64, col, 33, 120);
+    R(g, D, 0, 24, 64, 5); R(g, '#5E3A22', 0, 25, 64, 1); R(g, D, 31, 0, 3, 24);
+    for (k = 0; k < 9; k++) { R(g, D, 19 + k, 23 - k, 2, 2); R(g, D, 43 - k, 23 - k, 2, 2); }
+    win(g, 32, 12, 8, 9);
+    return o.c;
+  };
+  // Tejado de tejas redondeadas (32 px por unidad): filas desplazadas, borde inferior curvo oscuro y brillo.
   T.roof = function (col) {
-    var o = ctx(16, 16), g = o.g; g.fillStyle = col; g.fillRect(0, 0, 16, 16);
-    for (var y = 0; y < 16; y += 4) { g.fillStyle = PX.shade(col, 0.7); g.fillRect(0, y, 16, 1); for (var x = (y / 4 % 2) * 4; x < 16; x += 8) g.fillRect(x, y, 1, 4); g.fillStyle = PX.shade(col, 1.15); g.fillRect(0, y + 1, 16, 1); }
+    var o = ctx(32, 32), g = o.g, V = [0.92, 1.06, 1.0, 1.12], B = [5, 5, 6, 6, 7, 7, 8, 8, 8, 8, 7, 7, 6, 6, 5, 5], dk = PX.shade(col, 0.6), row, t, i;
+    function tile(x, y, c) {
+      for (i = 0; i < 16; i++) { R(g, c, x + i, y, 1, B[i]); R(g, dk, x + i, y + B[i] - 1, 1, 1); R(g, dk, x + i, y + B[i] - 2, 1, 1); }
+      R(g, PX.shade(col, 1.25), x + 1, y, 14, 1); R(g, PX.shade(col, 1.15), x + 4, y + 2, 4, 1); R(g, dk, x, y, 1, 7);
+    }
+    for (t = -1; t < 2; t++) tile(t * 16 + 8, -8, PX.shade(col, V[(6 + (t & 1)) % 4]));      // copia de la última fila para que las tejas enlacen
+    for (row = 3; row >= 0; row--) for (t = -1; t < 2; t++) tile(t * 16 + (row % 2) * 8, row * 8, PX.shade(col, V[(row * 2 + (t & 1)) % 4]));
     return o.c;
   };
   T.stone = function () { return PX.stoneTile(P.stone.top, 7); };

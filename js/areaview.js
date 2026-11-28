@@ -49,10 +49,10 @@ window.TT = window.TT || {};
         a.buildings.forEach(function (b) {
           var d = b.def, door = b.door ? b.door.x - b.x0 : -1;
           var side = lam(AT.facade(b.h, d.wall, {}), 1, 1), back = lam(AT.facade(b.w, d.wall, { blank: true }), 1, 1);
-          var mats = [side, side, lam(AT.roof(d.roof)), lam(AT.roof(d.roof)), lam(AT.facade(b.w, d.wall, { door: door, label: d.label }), 1, 1), back];
+          var mats = [side, side, lam(AT.roof(d.roof)), lam(AT.roof(d.roof)), lam(AT.facade(b.w, d.wall, { door: door, label: d.label, roof: d.roof }), 1, 1), back];
           var body = mesh(new THREE.BoxGeometry(b.w, WALL_H, b.h), mats, b.x0 + (b.w - 1) / 2, WALL_H / 2, b.y0 + (b.h - 1) / 2);
           body.userData.building = b; picks.push(body);
-          var roof = TT.AreaProps.roof(b.w, b.h, lam(AT.roof(d.roof)), lam(AT.facade(2, d.wall, { blank: true })));
+          var roof = TT.AreaProps.roof(b.w, b.h, lam(AT.roof(d.roof)), lam(AT.gable(d.wall)));
           roof.position.set(body.position.x, WALL_H, body.position.z); roof.castShadow = sh; roof.receiveShadow = sh; roof.userData.building = b; group.add(roof); picks.push(roof);
           var chx = body.position.x + (b.w >= b.h ? b.w * 0.25 : 0), chz = body.position.z + (b.w >= b.h ? -0.2 : b.h * 0.25);
           mesh(new THREE.BoxGeometry(0.34, 1.3, 0.34), stone, chx, WALL_H + 0.95, chz);                       // chimenea y humo

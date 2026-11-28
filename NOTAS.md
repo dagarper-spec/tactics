@@ -16,7 +16,8 @@ XP fija por batalla igual para todos, nivel máx. 8, tabla de crecimiento por cl
 ## Hitos
 - HECHO: motor de batalla, sprites PixelLab, UI, escenas, guardado, pueblo, **10a** (`party.js`, `encounters.js`, Save v2), **10b** (código escrito, SIN probar en navegador).
 - 10b: `dialog.js` (+`css/dialog.css`), `story.js` (guion como datos + hechos: intro, armor, mother, rumor, b1, b2, river), casa de David (`house` en areas.js, cofre = spot 'a'), NPC con `id` (madre, tabernera), salida sur del pueblo = batallas `ambush1` → `ambush2` (entra Clara) → `river`. Fin de batalla en historia: Continuar/Reintentar (`Encounters.cur.fromStory`). Nueva partida empieza en la casa. Enemigos de ambush1/2 sin equilibrar: ajustar jugando (`mod` en encounters.js).
+- Casas del pueblo: texturas nuevas en `areatex.js` (entramado, ventanas con luz, tejas redondeadas, tejadillo en la puerta, hastial con ventana), 32 px/casilla. Árboles, suelo y props siguen con el estilo antiguo (pendiente si se quiere unificar).
 - SIGUE: probar 10b → **11** XP/niveles → **12** equipo/tienda/herrería.
 
 ## Pendiente del usuario
-Audio: music_victory, music_defeat, hit_light. Sprites: David civil, NPC familiar, enemigos soldier/crossbow/captain, animaciones del hechicero. Confirmar defaults del prólogo.
+Audio: hit_light (music_victory y music_defeat ya incluidas). Sprites: David civil, NPC familiar, enemigos soldier/crossbow/captain, animaciones del hechicero. Confirmar defaults del prólogo.
