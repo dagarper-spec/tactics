@@ -21,7 +21,14 @@ window.TT = window.TT || {};
       C.camera.aspect = w / h; C.viewH = h;
       C.camera.updateProjectionMatrix();
     },
+    // flat(true, dist): vista frontal fija (interiores 2D); flat(false): vuelve a la cámara isométrica.
+    flat: function (on, dist) {
+      if (on) { C.pitch = 0; C.yaw = C.yawGoal = 0; C.step = 0; C.minDist = C.maxDist = C.dist = C.distGoal = dist; }
+      else if (C.isFlat) { C.pitch = 0.82; C.yaw = C.yawGoal = Math.PI / 4; C.step = 0; C.minDist = 8; C.maxDist = 26; }
+      C.isFlat = !!on;
+    },
     rotate: function (dir) {
+      if (C.isFlat) return;
       C.step = (C.step + dir + 4) % 4;
       C.yawGoal += dir * Math.PI / 2; // acumulado: gira por el camino corto
     },

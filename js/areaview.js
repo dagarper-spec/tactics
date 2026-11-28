@@ -10,6 +10,7 @@ window.TT = window.TT || {};
 
   TT.AreaView = {
     build: function (scene, a, q) {
+      if (a.def.flat) return TT.RoomView.build(scene, a);                // interiores 2D
       var group = new THREE.Group(), picks = [], bills = [], glows = [], walls = [], sh = !!(q && q.shadows), out = a.kind === 'out';
       var shadowTex = TT.Sprites.shadow(), glowTex = PX.glowTex(64);
       scene.add(group);

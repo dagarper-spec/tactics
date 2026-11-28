@@ -14,20 +14,20 @@ window.TT = window.TT || {};
       spawn: 'h', npcs: []
     },
     house: {
-      name: 'Casa de David', kind: 'room', solid: 'cktopsa', theme: { wall: '#C4A678', floor: '#8A6038' }, spots: { a: 'chest' },
-      rows: ['kkkkkkkkk', '.p......a', '.........', '..rrr.t..', '..rrr.s..', '.........', '....e....'],
-      doors: { e: { to: 'village', at: 'h', out: [0, -1] } }, spawn: 'e',
-      npcs: [{ id: 'madre', type: 'cleric', x: 3, y: 1, face: 2, name: 'Madre', line: 'Ten cuidado, hijo.' }]
+      name: 'Casa de David', kind: 'room', flat: true, solid: 'cktopsagy',
+      rows: ['kkkkkkkkk', 'y.aa..gg.', '.........', '..rrr.tt.', '..rrr.s..', '.........', '....e....'],
+      spots: { a: 'chest' }, doors: { e: { to: 'village', at: 'h', out: [0, -1] } }, spawn: 'e',
+      npcs: [{ id: 'madre', type: 'cleric', x: 4, y: 2, face: 2, name: 'Madre', line: 'Ten cuidado, hijo.' }]
     },
     shop: {
-      name: 'Tienda', kind: 'room', solid: 'cktops', theme: { wall: '#B89868', floor: '#7A5634' },
-      rows: ['kkkkkkkkk', '.........', '.ccccc...', '..rrr....', 'o.rrr...o', '.........', '....e....'],
+      name: 'Tienda', kind: 'room', flat: true, solid: 'cktopsagy',
+      rows: ['kkkkkkkkk', '.........', '.ccccc..y', '..rrr....', 'o.rrr...o', '.........', '....e....'],
       doors: { e: { to: 'village', at: 's', out: [0, -1] } }, spawn: 'e',
       npcs: [{ type: 'mage', x: 3, y: 1, face: 2, name: 'Mercader', line: 'Bienvenido. De momento no tengo nada a la venta; vuelve pronto.' }]
     },
     bar: {
-      name: 'Taberna', kind: 'room', solid: 'cktops', theme: { wall: '#8E6A4A', floor: '#5E3E26' },
-      rows: ['kkkkkkkkkkk', '.........p.', '.ccccccc...', '..rrrrrrr..', '.t...t...t.', '.s...s...s.', 'o.........o', '....e......'],
+      name: 'Taberna', kind: 'room', flat: true, solid: 'cktopsagy',
+      rows: ['kkkkkkkkkkk', '.......ppp.', '.ccccccc...', '..rrrrrrr..', '.tt..tt..tt', '.ss..ss..ss', 'o.........o', 'y...e.....y'],
       doors: { e: { to: 'village', at: 'b', out: [0, -1] } }, spawn: 'e',
       npcs: [{ id: 'tabernera', type: 'cleric', x: 4, y: 1, face: 2, name: 'Tabernera', line: 'La mejor sidra del paso. Hoy hay poca gente, siéntete como en casa.' }]
     }

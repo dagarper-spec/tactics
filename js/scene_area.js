@@ -12,16 +12,25 @@ window.TT = window.TT || {};
       arg = arg || {};
       var R = TT.R, A = TT.Audio, C = TT.Cam, a = Ar.get(arg.id || 'village'), out = a.kind === 'out', time = 0, phase = 0, entering = false;
       var scene = R.makeScene(); R.use(scene);
-      var view = TT.AreaView.build(scene, a, R.q);
+      var view = TT.AreaView.build(scene, a, R.q), flat = !!view.flat;
       var door = Ar.doorByCh(a, arg.spawn || a.def.spawn), step = (door.def.out) || (out ? [0, 1] : [0, -1]);
       var player = TT.Walker.make(scene, TT.Save.flag('armor') ? 'warrior' : 'traveler', door.x, door.y, TT.faceOf(step[0], step[1]));
       var npcs = a.npcs.map(function (n) { var w = TT.Walker.make(scene, n.type, n.x, n.y, n.face); w.npc = n; return w; });
       var picks = view.picks.concat(npcs.map(function (w) { return w.pick; }));
-      var ray = new THREE.Raycaster(), plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit = new THREE.Vector3();
+      var ray = new THREE.Raycaster(), plane = new THREE.Plane(new THREE.Vector3(0, flat ? 0 : 1, flat ? 1 : 0), 0), hit = new THREE.Vector3();
       S = { scene: scene, view: view }; TT.Scenes.ctx = { player: player, npcs: npcs, area: a };
 
-      C.noPan = true; C.dist = C.distGoal = out ? 21 : 12;                   // empieza con el zoom lejano
-      C.goal.set(player.pos.x, 0.6, player.pos.z); C.target.copy(C.goal);
+      C.noPan = true; if (R.tilt) R.tilt.enabled = !flat;                       // sin efecto maqueta en las salas 2D
+      if (flat) {                                                              // sala 2D: cámara fija de frente, con zoom entero de píxeles
+        var pr = Math.min(window.devicePixelRatio || 1, R.q.pr), vh = C.viewH * pr, vw = C.camera.aspect * vh;
+        var k = Math.max(1, Math.floor(Math.min(vw / view.size.w, vh * 0.86 / view.size.h)));
+        C.flat(true, (vh / (16 * k)) / (2 * Math.tan(C.camera.fov * Math.PI / 360)));
+        C.goal.set(view.center.x, view.center.y, 0); C.target.copy(C.goal); document.body.classList.add('flat');
+        view.place([player].concat(npcs));
+      } else {
+        C.flat(false); C.dist = C.distGoal = out ? 21 : 12;                   // empieza con el zoom lejano
+        C.goal.set(player.pos.x, 0.6, player.pos.z); C.target.copy(C.goal);
+      }
       $('title').textContent = a.name;
       TT.HUD.buttons([]);
       function hint() {
@@ -75,7 +84,7 @@ window.TT = window.TT || {};
         if (o && o.userData.walker && o.userData.walker.npc) return talk(o.userData.walker);
         if (o && o.userData.building) { var bd = o.userData.building.door; return bd && goTo({ x: bd.x, y: bd.y }, function () { arrive(bd); }); }
         if (!ray.ray.intersectPlane(plane, hit)) return;
-        var t = { x: Math.round(hit.x), y: Math.round(hit.z) }, sp = a.def.spots && a.def.spots[Ar.ch(a, t.x, t.y)];
+        var t = flat ? view.cellOf(hit) : { x: Math.round(hit.x), y: Math.round(hit.z) }, sp = a.def.spots && a.def.spots[Ar.ch(a, t.x, t.y)];
         if (sp && TT.Save.exists()) return useSpot(sp, t);
         goTo(t, function () { arrive(t); });
       });
@@ -87,7 +96,7 @@ window.TT = window.TT || {};
         player.update(raw, C.yaw, time);
         npcs.forEach(function (w) { w.update(raw, C.yaw, time); });
         if (player.moving()) { var ph = Math.floor(player.phase / 2); if (ph !== phase) { phase = ph; A.play('step', 0.45); } }
-        C.goal.set(player.pos.x, 0.6, player.pos.z);
+        if (flat) view.place([player].concat(npcs)); else C.goal.set(player.pos.x, 0.6, player.pos.z);
         C.update(raw);
         view.update(raw, C.yaw, time, C.camera.position);
       };

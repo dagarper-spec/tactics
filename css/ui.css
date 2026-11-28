@@ -75,6 +75,7 @@ body.scene-title #home { display: flex; }
 body.scene-title #game, body.scene-title #title, body.scene-title #rotL, body.scene-title #rotR,
 body.scene-title #queue, body.scene-title #hud, body.scene-title #fps { display: none; }
 body.scene-area #queue { display: none; }
+body.flat #rotL, body.flat #rotR { display: none; }
 body.scene-title #top { justify-content: flex-end; z-index: 6; }
 #fade { background: #000; opacity: 0; pointer-events: none; transition: opacity .35s; z-index: 20; }
 #fade.on { opacity: 1; pointer-events: auto; }

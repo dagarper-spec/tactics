@@ -12,7 +12,7 @@ window.TT = window.TT || {};
       var parts = TT.Particles.build(R.scene, R.q);
 
       TT.Units.init(TT.Encounters.get(arg && arg.enc)); TT.Encounters.cur.fromStory = !!(arg && arg.story);
-      $('end').hidden = true;
+      $('end').hidden = true; TT.Cam.flat(false); if (TT.R.tilt) TT.R.tilt.enabled = true;
       var view = TT.UnitView.build(R.scene);
       var fx = TT.FX.build(R.scene);
       TT.Impact.build(R.scene);
