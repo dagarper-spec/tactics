@@ -33,6 +33,7 @@ window.TT = window.TT || {};
       if (c === 'u') { if (!X.bush) X.bush = AT.bush(); X.billboard(X.bush, 1 / 20, x, y); X.blob(x, y, 0.5); return true; }
       return false;
     }
+    if (c === 'a') { X.mesh(new B.BoxGeometry(0.8, 0.5, 0.55), X.wood, x, 0.25, y); X.mesh(new B.BoxGeometry(0.84, 0.12, 0.59), X.stone, x, 0.56, y, false); return true; }
     if (c === 'r') { if (!X.rug) X.rug = lam(AT.rug()); var m = X.mesh(new B.PlaneGeometry(0.96, 0.96), X.rug, x, 0.015, y, false); m.rotation.x = -Math.PI / 2; m.castShadow = false; return true; }
     if (c === 's') { X.mesh(new B.CylinderGeometry(0.2, 0.22, 0.45, 8), X.wood, x, 0.22, y); return true; }
     if (c === 'p') {                                                   // chimenea con fuego

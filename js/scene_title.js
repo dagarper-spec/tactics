@@ -15,7 +15,7 @@ window.TT = window.TT || {};
       nw.onclick = function () {
         TT.Audio.unlock();
         if (S.exists() && !armed) { armed = true; nw.textContent = 'Pulsa otra vez: se borra la partida'; return; }
-        S.fresh(); TT.Party.load(); TT.Audio.play('ui_confirm'); TT.Scenes.go('area', { id: 'village' });
+        S.fresh(); TT.Party.load(); TT.Audio.play('ui_confirm'); TT.Scenes.go('area', { id: 'house' });
       };
       $('hBat').onclick = function () { TT.Audio.unlock(); TT.Audio.play('ui_confirm'); TT.Scenes.go('battle'); };
     }

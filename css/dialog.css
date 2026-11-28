@@ -1,0 +1,11 @@
+/* Cuadro de diálogo del modo historia */
+#dlg { position: fixed; z-index: 30; left: 50%; bottom: max(12px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(640px, 94vw); min-height: 96px; display: flex; gap: 10px; align-items: flex-end;
+  background: var(--parch); color: var(--ink); font-family: var(--serif); padding: 6px 10px; cursor: pointer; user-select: none; }
+#dlg[hidden] { display: none; }
+#dlgPic { width: 72px; height: 72px; flex: none; background: rgba(75,46,27,.18); border: 2px solid #4b2e1b; border-radius: 8px; image-rendering: pixelated; }
+#dlg > div { flex: 1; padding-bottom: 4px; }
+#dlgName { font-weight: bold; font-size: 16px; color: #7a4b00; letter-spacing: .03em; min-height: 1.2em; }
+#dlgText { font-size: 15px; line-height: 1.35; margin-top: 2px; }
+#dlg.narr #dlgText { font-style: italic; color: var(--ink2); }
+#dlg::after { content: '\25BC'; position: absolute; right: 12px; bottom: 6px; font-size: 11px; color: #7a4b00; animation: dlgb 1s infinite; }
+@keyframes dlgb { 50% { transform: translateY(3px); } }

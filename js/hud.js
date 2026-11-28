@@ -65,10 +65,13 @@ window.TT = window.TT || {};
     var el = $('end'), win = winner === 'hero';
     el.innerHTML = '<h2 class="' + (win ? 'win' : 'lose') + '">' + (win ? '¡Victoria!' : 'Derrota') + '</h2>' +
       '<p>' + (win ? 'Los enemigos han caído.' : 'Los héroes han caído.') + '</p>' +
-      '<p>Rondas: <b>' + rounds + '</b> · Héroes en pie: <b>' + alive + '/4</b></p>' +
-      '<button id="again">Jugar de nuevo</button>';
+      '<p>Rondas: <b>' + rounds + '</b> · Héroes en pie: <b>' + alive + '/' + TT.Encounters.cur.heroes.length + '</b></p>' +
+      '<button id="again">' + (TT.Encounters.cur.fromStory ? (win ? 'Continuar' : 'Reintentar') : 'Jugar de nuevo') + '</button>';
     el.hidden = false;
-    $('again').addEventListener('click', function () { try { sessionStorage.setItem('tt_retry', '1'); } catch (e) {} location.reload(); });
+    $('again').addEventListener('click', function () {
+      if (TT.Encounters.cur.fromStory) return TT.Story.after(TT.Encounters.cur.id, win);
+      try { sessionStorage.setItem('tt_retry', '1'); } catch (e) {} location.reload();
+    });
   };
 
   H.tile = function (c) { return '<b>' + M.label(c.x, c.y) + '</b> · ' + TILE[c.type] + ' · altura ' + Math.max(0, c.h); };

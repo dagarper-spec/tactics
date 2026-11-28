@@ -7,6 +7,7 @@
 <title>Tactics — El paso del río</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/ui.css">
+<link rel="stylesheet" href="css/dialog.css">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -36,6 +37,7 @@
 </div>
 <div class="panel" id="queue"></div>
 <div class="panel" id="end" hidden></div>
+<div class="panel" id="dlg" hidden><canvas id="dlgPic" width="72" height="72"></canvas><div><div id="dlgName"></div><div id="dlgText"></div></div></div>
 <div class="panel" id="hud">
   <div id="info">Toca una unidad para seleccionarla. Arrastra para mover la cámara; pellizca o usa la rueda para el zoom.</div>
   <div class="btns" id="actions"></div>
@@ -94,6 +96,8 @@
 <script src="js/render.js"></script>
 <script src="js/save.js"></script>
 <script src="js/scenes.js"></script>
+<script src="js/dialog.js"></script>
+<script src="js/story.js"></script>
 <script src="js/scene_title.js"></script>
 <script src="js/scene_battle.js"></script>
 <script src="js/areas.js"></script>

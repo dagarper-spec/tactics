@@ -9,9 +9,15 @@ window.TT = window.TT || {};
       rows: ['TTTTTTTTTTTTTTTTTT', 'T..T.............T', 'T.HHH...SSSS.BBBBT', 'T.HHH.u.SSSS.BBBBT', 'T..h..q..s.o..bv.T', 'T.,,,,,,,,,,,,,,.T', 'T.f..,..:::...,.lT', 'T.fMM,..:w:NNN,..T', 'T..MM,..:::NNN,..T', 'T..Tm,,,,,,,n,,..T', 'T....,.......T...T', 'T.l..,..T.....T..T', 'TTTTTTTTTxTTTTTTTT'],
       b: { H: { door: 'h', wall: '#E8D9B8', roof: '#9C4A3A', label: '' }, S: { door: 's', wall: '#D9C7A0', roof: '#3F6FA8', label: 'TIENDA' }, B: { door: 'b', wall: '#C9A98A', roof: '#8A3A2A', label: 'TABERNA' },
         M: { door: 'm', wall: '#C8B890', roof: '#5A7A4A', label: '' }, N: { door: 'n', wall: '#E0C8A0', roof: '#7A4A6A', label: '' } },
-      doors: { h: { msg: 'Tu casa. Por ahora no hace falta volver.' }, s: { to: 'shop', at: 'e' }, b: { to: 'bar', at: 'e' }, m: { msg: 'La puerta está cerrada con llave.' }, n: { msg: 'Nadie contesta. Parece que no hay nadie en casa.' },
-        x: { msg: 'El camino sigue hacia el río, pero aún no es hora de partir.' } },
+      doors: { h: { to: 'house', at: 'e' }, s: { to: 'shop', at: 'e' }, b: { to: 'bar', at: 'e' }, m: { msg: 'La puerta está cerrada con llave.' }, n: { msg: 'Nadie contesta. Parece que no hay nadie en casa.' },
+        x: { story: 'exit', out: [0, -1], msg: '' } },
       spawn: 'h', npcs: []
+    },
+    house: {
+      name: 'Casa de David', kind: 'room', solid: 'cktopsa', theme: { wall: '#C4A678', floor: '#8A6038' }, spots: { a: 'chest' },
+      rows: ['kkkkkkkkk', '.p......a', '.........', '..rrr.t..', '..rrr.s..', '.........', '....e....'],
+      doors: { e: { to: 'village', at: 'h', out: [0, -1] } }, spawn: 'e',
+      npcs: [{ id: 'madre', type: 'cleric', x: 3, y: 1, face: 2, name: 'Madre', line: 'Ten cuidado, hijo.' }]
     },
     shop: {
       name: 'Tienda', kind: 'room', solid: 'cktops', theme: { wall: '#B89868', floor: '#7A5634' },
@@ -23,7 +29,7 @@ window.TT = window.TT || {};
       name: 'Taberna', kind: 'room', solid: 'cktops', theme: { wall: '#8E6A4A', floor: '#5E3E26' },
       rows: ['kkkkkkkkkkk', '.........p.', '.ccccccc...', '..rrrrrrr..', '.t...t...t.', '.s...s...s.', 'o.........o', '....e......'],
       doors: { e: { to: 'village', at: 'b', out: [0, -1] } }, spawn: 'e',
-      npcs: [{ type: 'cleric', x: 4, y: 1, face: 2, name: 'Tabernera', line: 'La mejor sidra del paso. Hoy hay poca gente, siéntete como en casa.' }]
+      npcs: [{ id: 'tabernera', type: 'cleric', x: 4, y: 1, face: 2, name: 'Tabernera', line: 'La mejor sidra del paso. Hoy hay poca gente, siéntete como en casa.' }]
     }
   };
   var DIRS = [[0, -1], [1, 0], [0, 1], [-1, 0]], cache = {};

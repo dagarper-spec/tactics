@@ -14,8 +14,9 @@ Prólogo por defecto: casa de David (armadura + cofre) → ponerse la armadura �
 XP fija por batalla igual para todos, nivel máx. 8, tabla de crecimiento por clase (`TT.Growth`), enemigos fijos por encuentro. Habilidades como premio de batalla (por ahora todas). Equipo: 1 arma + 1 armadura, modificadores pequeños; se compra, se encuentra en cofres, se mejora en herrería (+1..+3, monedas + material). Sin consumables por ahora.
 
 ## Hitos
-- HECHO: motor de batalla, sprites PixelLab, UI, escenas, guardado, pueblo, **10a** (`party.js`, `encounters.js`, Save v2).
-- SIGUE: **10b** diálogos + prólogo (sistema de diálogo con retrato, script de datos, interior de la casa, salida, batallas 1 y 2) → **11** XP/niveles → **12** equipo/tienda/herrería.
+- HECHO: motor de batalla, sprites PixelLab, UI, escenas, guardado, pueblo, **10a** (`party.js`, `encounters.js`, Save v2), **10b** (código escrito, SIN probar en navegador).
+- 10b: `dialog.js` (+`css/dialog.css`), `story.js` (guion como datos + hechos: intro, armor, mother, rumor, b1, b2, river), casa de David (`house` en areas.js, cofre = spot 'a'), NPC con `id` (madre, tabernera), salida sur del pueblo = batallas `ambush1` → `ambush2` (entra Clara) → `river`. Fin de batalla en historia: Continuar/Reintentar (`Encounters.cur.fromStory`). Nueva partida empieza en la casa. Enemigos de ambush1/2 sin equilibrar: ajustar jugando (`mod` en encounters.js).
+- SIGUE: probar 10b → **11** XP/niveles → **12** equipo/tienda/herrería.
 
 ## Pendiente del usuario
 Audio: music_victory, music_defeat, hit_light. Sprites: David civil, NPC familiar, enemigos soldier/crossbow/captain, animaciones del hechicero. Confirmar defaults del prólogo.
